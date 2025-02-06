@@ -4,8 +4,8 @@ function index(req, res, next) {
     
 }
 
-function show(req, res, next) {
+function create(req, res, next) {
     
 }
 
-export default { index, show };
+export default { index, create };
