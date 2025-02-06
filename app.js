@@ -1,21 +1,25 @@
-//Express init
 import express from 'express';
 const app = express();
 const port = process.env.SERVER_PORT;
-import esempioRouter from './routers/esempio.js';
+import reviewsRouter from './routers/reviews.js';
 import corsMiddleware from 'cors'
 
+
+// collegamento al frontend
 app.use(corsMiddleware({
     origin:"http://localhost:5173",
 }));
 
 app.use(express.json());
 
+//rende accessibile la cartella public
 app.use(express.static("public"));
 
-app.use("/esempio", esempioRouter);
+// Include reviews in tutte le rotte nel reviews router
+app.use("/reviews", reviewsRouter);
 
 
+//apre la porta del server
 app.listen(port, () => {
-    console.log("Ascolto mode ON");
+    console.log("Server in ascolto");
 });
