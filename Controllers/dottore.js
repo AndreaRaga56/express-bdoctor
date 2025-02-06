@@ -57,7 +57,23 @@ function show(req, res, next) {
 }
 
 function create(req, res, next) {
-    
+    const { id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine } = req.body;
+
+    if (!id_specializzazione || !nome || !cognome || !email || !telefono || !indirizzo || !immagine) {
+        return res.status(400).json({ status: "error", message: "Tutti i campi sono obbligatori" });
+    }
+
+    const sql = `
+        INSERT INTO dottori (id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine) 
+        VALUES (?, ?, ?, ?, ?, ?, ?);
+    `;
+
+    db.query(sql, [id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine])
+        .then(([result]) => res.status(201).json({ status: "success", message: "Dottore creato con successo", id: result.insertId }))
+        .catch((error) => {
+            console.error("❌ Errore nella creazione del dottore:", error);
+            res.status(500).json({ status: "error", message: "Errore durante la creazione del dottore" });
+        });
 }
 
 export default { index, show, create};
