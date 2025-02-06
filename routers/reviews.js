@@ -6,6 +6,6 @@ const router = express.Router();
 router.get("/:id", reviewsController.getReviews);
 
 //Create
-router.post("/doctors/:id//reviews", reviewsController.createReviews);
+router.post("/doctors/:id/reviews", reviewsController.createReviews);
 
 export default router;
