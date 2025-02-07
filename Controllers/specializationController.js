@@ -6,12 +6,10 @@ const index = (req, res, next) => {
     FROM specializzazioni
     `
 
-    connection.query(sql, (err, results) => {
+    connection.query(sql, (err, results, next) => {
         if (err) {
-            return res.status(500).json({
-                status: "failed",
-                messagge: "Errore interno del server"
-            })
+            return next( new Error( err.message));
+            
         }
 
         if (results.length === 0) {
