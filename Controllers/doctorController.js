@@ -1,15 +1,16 @@
 import connection from '../data/db.js';
+import slugify from 'slugify';
 
 function getDoctors(req, res, next) {
     const sql = `
         SELECT dottori.id, dottori.nome, dottori.cognome, dottori.email, dottori.telefono, 
                dottori.indirizzo, dottori.immagine, specializzazioni.nome AS specializzazione,
-               IFNULL(AVG(recensioni.voto), 0) AS media_voto
+               ROUND(IFNULL(AVG(recensioni.voto), 0), 2) AS media_voto
         FROM dottori
         LEFT JOIN recensioni ON dottori.id = recensioni.id_dottore
         JOIN specializzazioni ON dottori.id_specializzazione = specializzazioni.id
         GROUP BY dottori.id
-        ORDER BY dottori.nome ASC;
+        ORDER BY media_voto DESC, dottori.nome ASC;
     `;
 
     connection.query(sql, (err, result) => {
@@ -22,13 +23,13 @@ function getDoctors(req, res, next) {
 }
 
 function getSingleDoctor(req, res, next) {
-    const docId = parseInt(req.params.id);
+    const slug = req.params.slug;
 
     const sql = `
         SELECT dottori.*, specializzazioni.nome AS specializzazione
         FROM dottori
         LEFT JOIN specializzazioni ON dottori.id_specializzazione = specializzazioni.id
-        WHERE dottori.id = ?;
+        WHERE dottori.slug = ?;
     `;
 
     const sqlReview = `
@@ -37,7 +38,7 @@ function getSingleDoctor(req, res, next) {
         WHERE recensioni.id_dottore = ?;
     `;
 
-    connection.query(sql, [docId], (err, result) => {
+    connection.query(sql, [slug], (err, result) => {
         if (err) {
             return next(new Error("Errore interno del server"));
         }
@@ -48,7 +49,7 @@ function getSingleDoctor(req, res, next) {
 
         const doctorData = result[0];
 
-        connection.query(sqlReview, [docId], (err2, reviews) => {
+        connection.query(sqlReview, [doctorData.id], (err2, reviews) => {
             if (err2) {
                 return next(new Error("Errore interno del server nel recupero delle recensioni"));
             }
@@ -65,6 +66,10 @@ function getSingleDoctor(req, res, next) {
 
 function createDoctor(req, res, next) {
     const { id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine } = req.body;
+    const slug = slugify(nome + '-' + cognome, {
+        lower: true,
+        strict: true,
+    });
 
     //Validazioni
 
@@ -121,11 +126,11 @@ function createDoctor(req, res, next) {
     })
 
     const sql = `
-        INSERT INTO dottori (id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine) 
-        VALUES (?, ?, ?, ?, ?, ?, ?);
+        INSERT INTO dottori (id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine, slug) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
     `;
 
-    connection.query(sql, [id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine], (err, result) => {
+    connection.query(sql, [id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine, slug], (err, result) => {
         if (err) {
             return next(new Error("Errore durante la creazione del dottore"));
         }
