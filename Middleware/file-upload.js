@@ -4,7 +4,7 @@ import multer from 'multer';
 const storage = multer.diskStorage({
     //dove
     destination: (req, file, callbackf) => {
-        callbackf(null, "public/images/movies")
+        callbackf(null, "public/images/doctors")
     },
     //come
     filename: (req, file, callbackf) => {
