@@ -3,7 +3,7 @@ import slugify from 'slugify';
 
 function getDoctors(req, res, next) {
     const sql = `
-        SELECT dottori.id, dottori.nome, dottori.cognome, dottori.email, dottori.telefono, 
+        SELECT dottori.id, dottori.nome, dottori.cognome, dottori.slug, dottori.email, dottori.telefono, 
                dottori.indirizzo, dottori.immagine, specializzazioni.nome AS specializzazione,
                ROUND(IFNULL(AVG(recensioni.voto), 0), 2) AS media_voto
         FROM dottori
@@ -18,9 +18,11 @@ function getDoctors(req, res, next) {
             return next(new Error("Errore nel recupero dei dottori"));
         }
 
+        console.log("Dati medici inviati al frontend:", result); // 🔍 DEBUG
         return res.status(200).json({ status: "success", data: result });
     });
 }
+
 
 function getSingleDoctor(req, res, next) {
     const slug = req.params.slug;
