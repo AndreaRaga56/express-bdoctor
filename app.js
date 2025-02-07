@@ -2,6 +2,8 @@ import express from 'express';
 const app = express();
 const port = process.env.SERVER_PORT;
 import reviewsRouter from './routers/reviews.js';
+import specializationsRouter from './routers/specialization.js';
+import doctorsRouter from './routers/doctors.js';
 import corsMiddleware from 'cors'
 
 
@@ -17,6 +19,10 @@ app.use(express.static("public"));
 
 // Include reviews in tutte le rotte nel reviews router
 app.use("/reviews", reviewsRouter);
+
+app.use("/specialization", specializationsRouter);
+
+app.use("/doctors", doctorsRouter);
 
 
 //apre la porta del server
