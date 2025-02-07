@@ -27,33 +27,46 @@ function index(req, res, next) {
 
 function show(req, res, next) {
     const docId = parseInt(req.params.id);
-    const sql = "SELECT * FROM dottori WHERE id=?;";
-    const sqlReview = 
-    SELECT recensioni.id, recensioni.nome_paziente AS patient, recensioni.voto AS voto, recensioni.testo AS text
-    from dottori
-    inner join recensioni
-    on dottori.id=recensioni.id_dottore
-    WHERE dottori.id=?;;
+
+    const sql = `
+        SELECT dottori.*, specializzazioni.nome AS specializzazione
+        FROM dottori
+        LEFT JOIN specializzazioni ON dottori.id_specializzazione = specializzazioni.id
+        WHERE dottori.id = ?;
+    `;
+
+    const sqlReview = `
+        SELECT recensioni.id, recensioni.nome_paziente AS patient, recensioni.voto AS voto, recensioni.testo AS text
+        FROM recensioni
+        WHERE recensioni.id_dottore = ?;
+    `;
+
     connection.query(sql, [docId], (err, result) => {
         if (err) {
-            next(new Error("Errore interno del server"));
-        } else if (result.length === 0) {
-            next(new Error("Il medico che stai cercando non è presente nel Database"));
-        } else {
-            connection.query(sqlReview, [docId], (err2, reviews) => {
-                let data = {
-                    ...result[0]
-                }
-                if (reviews) {
-                    data.reviews = reviews
-                }
-                res.status(200).json({
-                    status: "Success",
-                    data
-                })
-            })
+            console.error("❌ Errore nella query principale:", err);
+            return res.status(500).json({ status: "error", message: "Errore interno del server" });
         }
-    })
+
+        if (result.length === 0) {
+            return res.status(404).json({ status: "error", message: "Il medico che stai cercando non è presente nel Database" });
+        }
+
+        const doctorData = result[0];
+
+        connection.query(sqlReview, [docId], (err2, reviews) => {
+            if (err2) {
+                console.error("❌ Errore nel recupero delle recensioni:", err2);
+                return res.status(500).json({ status: "error", message: "Errore interno del server nel recupero delle recensioni" });
+            }
+
+            doctorData.reviews = reviews || [];
+
+            res.status(200).json({
+                status: "success",
+                data: doctorData
+            });
+        });
+    });
 }
 
 function create(req, res, next) {
