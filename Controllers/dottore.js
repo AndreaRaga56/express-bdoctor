@@ -1,7 +1,7 @@
 import connection from '../data/db.js';
 
 function index(req, res, next) {
-    const sql = 
+    const sql = `
         SELECT dottori.id, dottori.nome, dottori.cognome, dottori.email, dottori.telefono, 
                dottori.indirizzo, dottori.immagine, specializzazioni.nome AS specializzazione,
                IFNULL(AVG(recensioni.voto), 0) AS media_voto
@@ -10,9 +10,10 @@ function index(req, res, next) {
         JOIN specializzazioni ON dottori.id_specializzazione = specializzazioni.id
         GROUP BY dottori.id
         ORDER BY dottori.nome ASC;
-    ;
-
+    `;
+  
     db.query(sql)
+    
         .then(([rows]) => {
             return res.status(200).json({ status: "success", data: rows });
         })
@@ -28,7 +29,6 @@ function index(req, res, next) {
 function show(req, res, next) {
     const docId = parseInt(req.params.id);
 
-
     const sql = `
         SELECT dottori.*, specializzazioni.nome AS specializzazione
         FROM dottori
@@ -41,7 +41,7 @@ function show(req, res, next) {
         FROM recensioni
         WHERE recensioni.id_dottore = ?;
     `;
-  
+
     connection.query(sql, [docId], (err, result) => {
         if (err) {
             console.error("❌ Errore nella query principale:", err);
