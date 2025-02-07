@@ -1,7 +1,7 @@
 import connection from '../data/db.js';
 
 function index(req, res, next) {
-    const sql = `
+    const sql = 
         SELECT dottori.id, dottori.nome, dottori.cognome, dottori.email, dottori.telefono, 
                dottori.indirizzo, dottori.immagine, specializzazioni.nome AS specializzazione,
                IFNULL(AVG(recensioni.voto), 0) AS media_voto
@@ -10,7 +10,7 @@ function index(req, res, next) {
         JOIN specializzazioni ON dottori.id_specializzazione = specializzazioni.id
         GROUP BY dottori.id
         ORDER BY dottori.nome ASC;
-    `;
+    ;
 
     db.query(sql)
         .then(([rows]) => {
@@ -29,11 +29,12 @@ function show(req, res, next) {
     const docId = parseInt(req.params.id);
     const sql = "SELECT * FROM dottori WHERE id=?;";
     const sqlReview = 
-    SELECT recensioni.id, recensioni.nome_paziente AS patient, recensioni.voto AS voto, recensioni.testo AS text
+    SELECT `recensioni.id, recensioni.nome_paziente AS patient, recensioni.voto AS voto, recensioni.testo AS text
     from dottori
     inner join recensioni
     on dottori.id=recensioni.id_dottore
-    WHERE dottori.id=?;;
+    WHERE dottori.id=?;`
+    ;
     connection.query(sql, [docId], (err, result) => {
         if (err) {
             next(new Error("Errore interno del server"));
