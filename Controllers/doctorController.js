@@ -1,6 +1,6 @@
 import connection from '../data/db.js';
 
-function index(req, res, next) {
+function getDoctors(req, res, next) {
     const sql = `
         SELECT dottori.id, dottori.nome, dottori.cognome, dottori.email, dottori.telefono, 
                dottori.indirizzo, dottori.immagine, specializzazioni.nome AS specializzazione,
@@ -12,21 +12,17 @@ function index(req, res, next) {
         ORDER BY dottori.nome ASC;
     `;
   
-    db.query(sql)
-    
-        .then(([rows]) => {
-            return res.status(200).json({ status: "success", data: rows });
-        })
-        .catch((error) => {
-            console.error("Errore nel recupero dei dottori:", error);
-            return res.status(500).json({ status: "error", message: "Errore nel recupero dei dottori" });
-        });
+    connection.query(sql, (err, result) => {
+        if (err) {
+            console.error("Errore nel recupero dei dottori:", err);
+            return next(new Error("Errore nel recupero dei dottori"));
+        }
+
+        return res.status(200).json({ status: "success", data: result });
+    });
 }
 
-
-
-
-function show(req, res, next) {
+function getSingleDoctor(req, res, next) {
     const docId = parseInt(req.params.id);
 
     const sql = `
@@ -45,7 +41,7 @@ function show(req, res, next) {
     connection.query(sql, [docId], (err, result) => {
         if (err) {
             console.error("❌ Errore nella query principale:", err);
-            return res.status(500).json({ status: "error", message: "Errore interno del server" });
+            return next(new Error("Errore interno del server"));
         }
 
         if (result.length === 0) {
@@ -57,7 +53,7 @@ function show(req, res, next) {
         connection.query(sqlReview, [docId], (err2, reviews) => {
             if (err2) {
                 console.error("❌ Errore nel recupero delle recensioni:", err2);
-                return res.status(500).json({ status: "error", message: "Errore interno del server nel recupero delle recensioni" });
+                return next(new Error("Errore interno del server nel recupero delle recensioni"));
             }
 
             doctorData.reviews = reviews || [];
@@ -70,7 +66,7 @@ function show(req, res, next) {
     });
 }
 
-function create(req, res, next) {
+function createDoctor(req, res, next) {
     const { id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine } = req.body;
 
     if (!id_specializzazione || !nome || !cognome || !email || !telefono || !indirizzo || !immagine) {
@@ -82,12 +78,18 @@ function create(req, res, next) {
         VALUES (?, ?, ?, ?, ?, ?, ?);
     `;
 
-    db.query(sql, [id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine])
-        .then(([result]) => res.status(201).json({ status: "success", message: "Dottore creato con successo", id: result.insertId }))
-        .catch((error) => {
-            console.error("❌ Errore nella creazione del dottore:", error);
-            res.status(500).json({ status: "error", message: "Errore durante la creazione del dottore" });
-        });
+    connection.query(sql, [id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine], (err, result) => {
+        if (err) {
+            console.error("❌ Errore nella creazione del dottore:", err);
+            return next(new Error("Errore durante la creazione del dottore"));
+        }
+
+        res.status(201).json({ status: "success", message: "Dottore creato con successo", id: result.insertId });
+    });
 }
 
-export default { index, show, create};
+export default { 
+    getDoctors,
+    getSingleDoctor,
+    createDoctor
+};
