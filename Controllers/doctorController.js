@@ -11,10 +11,9 @@ function getDoctors(req, res, next) {
         GROUP BY dottori.id
         ORDER BY dottori.nome ASC;
     `;
-  
+
     connection.query(sql, (err, result) => {
         if (err) {
-            console.error("Errore nel recupero dei dottori:", err);
             return next(new Error("Errore nel recupero dei dottori"));
         }
 
@@ -40,7 +39,6 @@ function getSingleDoctor(req, res, next) {
 
     connection.query(sql, [docId], (err, result) => {
         if (err) {
-            console.error("❌ Errore nella query principale:", err);
             return next(new Error("Errore interno del server"));
         }
 
@@ -52,7 +50,6 @@ function getSingleDoctor(req, res, next) {
 
         connection.query(sqlReview, [docId], (err2, reviews) => {
             if (err2) {
-                console.error("❌ Errore nel recupero delle recensioni:", err2);
                 return next(new Error("Errore interno del server nel recupero delle recensioni"));
             }
 
@@ -69,9 +66,59 @@ function getSingleDoctor(req, res, next) {
 function createDoctor(req, res, next) {
     const { id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine } = req.body;
 
+    //Validazioni
+
+    //Tutti i campi sono obbligatori
     if (!id_specializzazione || !nome || !cognome || !email || !telefono || !indirizzo || !immagine) {
         return res.status(400).json({ status: "error", message: "Tutti i campi sono obbligatori" });
     }
+
+    // Validazione del nome
+    if (typeof nome !== 'string' || nome.trim().length <= 3) {
+        return res.status(400).json({
+            status: 'fail',
+            message: 'Il nome deve avere più di 3 caratteri'
+        });
+    }
+
+    // Validazione del cognome
+    if (typeof cognome !== 'string' || cognome.trim().length <= 3) {
+        return res.status(400).json({
+            status: 'fail',
+            message: 'Il cognome deve avere più di 3 caratteri'
+        });
+    }
+
+    // Verifica se il numero di telefono è valido
+    const phoneRegex = /^\+?[0-9]{1,15}$/;
+    if (!phoneRegex.test(telefono)) {
+        return res.status(400).json({ status: "error", message: "Il numero di telefono non è valido." });
+    }
+
+    // Validazione indirizzo
+    if (typeof indirizzo !== 'string' || indirizzo.trim().length <= 5) {
+        return res.status(400).json({
+            status: 'fail',
+            message: "L'indirizzo deve avere più di 5 caratteri"
+        });
+    }
+
+    // Validazione email
+    if (!email.includes('@')) {
+        return res.status(400).json({ status: "error", message: "La mail inserita non è valida" });
+    }
+
+    //Verifica se la mail già esiste
+    const checkEmailSql = "SELECT id FROM dottori WHERE email = ?"
+    connection.query(checkEmailSql, [email], (err, result) => {
+        if (err) {
+            return next(new Error(err.message));
+        }
+
+        if (result.length > 0) {
+            return res.status(400).json({ status: "error", message: "Email già registrata" });
+        }
+    })
 
     const sql = `
         INSERT INTO dottori (id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine) 
@@ -80,7 +127,6 @@ function createDoctor(req, res, next) {
 
     connection.query(sql, [id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine], (err, result) => {
         if (err) {
-            console.error("❌ Errore nella creazione del dottore:", err);
             return next(new Error("Errore durante la creazione del dottore"));
         }
 
@@ -88,7 +134,7 @@ function createDoctor(req, res, next) {
     });
 }
 
-export default { 
+export default {
     getDoctors,
     getSingleDoctor,
     createDoctor
