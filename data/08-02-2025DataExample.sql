@@ -7,27 +7,27 @@ INSERT INTO dottori (id_specializzazione, nome, cognome, email, telefono, indiri
 -- Dermatologia (3 nuovi dottori)
 (2, 'Sara', 'Rinaldi', 'sara.rinaldi@example.com', '3339012345', 'Via San Marco 9, Bologna', 'sara_rinaldi.jpg', 'sara-rinaldi'),
 (2, 'Giulia', 'Ferrari', 'giulia.ferrari@example.com', '3330123456', 'Via Donizetti 4, Firenze', 'giulia_ferrari.jpg', 'giulia-ferrari'),
-(2, 'Federico', 'Romani', 'federico.romani@example.com', '3331234567', 'Via Leopardi 2, Bari', 'federico_romani.jpg', 'federico-romani'),
+(2, 'Federico', 'Romani', 'federico.romani@example.com', '3331234568', 'Via Leopardi 2, Bari', 'federico_romani.jpg', 'federico-romani'),
 
 -- Pediatria (4 nuovi dottori)
-(3, 'Marco', 'Basile', 'marco.basile@example.com', '3332345678', 'Via Colonna 1, Napoli', 'marco_basile.jpg', 'marco-basile'),
-(3, 'Elisa', 'Greco', 'elisa.greco@example.com', '3333456789', 'Via Alfieri 7, Venezia', 'elisa_greco.jpg', 'elisa-greco'),
-(3, 'Stefano', 'D’Amico', 'stefano.damico@example.com', '3334567890', 'Corso Garibaldi 12, Palermo', 'stefano_damico.jpg', 'stefano-damico'),
-(3, 'Marta', 'Lombardi', 'marta.lombardi@example.com', '3335678901', 'Via Vivaldi 11, Genova', 'marta_lombardi.jpg', 'marta-lombardi'),
+(3, 'Marco', 'Basile', 'marco.basile@example.com', '3322345678', 'Via Colonna 1, Napoli', 'marco_basile.jpg', 'marco-basile'),
+(3, 'Elisa', 'Greco', 'elisa.greco@example.com', '3323456789', 'Via Alfieri 7, Venezia', 'elisa_greco.jpg', 'elisa-greco'),
+(3, 'Stefano', 'D’Amico', 'stefano.damico@example.com', '3324567890', 'Corso Garibaldi 12, Palermo', 'stefano_damico.jpg', 'stefano-damico'),
+(3, 'Marta', 'Lombardi', 'marta.lombardi@example.com', '3325678901', 'Via Vivaldi 11, Genova', 'marta_lombardi.jpg', 'marta-lombardi'),
 
 -- Ortopedia (5 nuovi dottori)
-(4, 'Antonio', 'Esposito', 'antonio.esposito@example.com', '3336789012', 'Corso Vercelli 3, Torino', 'antonio_esposito.jpg', 'antonio-esposito'),
-(4, 'Veronica', 'De Luca', 'veronica.deluca@example.com', '3337890123', 'Via Rossini 8, Bari', 'veronica_deluca.jpg', 'veronica-deluca'),
-(4, 'Lorenzo', 'Santoro', 'lorenzo.santoro@example.com', '3338901234', 'Via Puccini 5, Firenze', 'lorenzo_santoro.jpg', 'lorenzo-santoro'),
-(4, 'Chiara', 'Morelli', 'chiara.morelli@example.com', '3339012345', 'Via Marconi 10, Milano', 'chiara_morelli.jpg', 'chiara-morelli'),
-(4, 'Gabriele', 'Cattaneo', 'gabriele.cattaneo@example.com', '3330123456', 'Via Carducci 6, Roma', 'gabriele_cattaneo.jpg', 'gabriele-cattaneo'),
+(4, 'Antonio', 'Esposito', 'antonio.esposito@example.com', '3326789012', 'Corso Vercelli 3, Torino', 'antonio_esposito.jpg', 'antonio-esposito'),
+(4, 'Veronica', 'De Luca', 'veronica.deluca@example.com', '3337290123', 'Via Rossini 8, Bari', 'veronica_deluca.jpg', 'veronica-deluca'),
+(4, 'Lorenzo', 'Santoro', 'lorenzo.santoro@example.com', '3238901234', 'Via Puccini 5, Firenze', 'lorenzo_santoro.jpg', 'lorenzo-santoro'),
+(4, 'Chiara', 'Morelli', 'chiara.morelli@example.com', '3329012345', 'Via Marconi 10, Milano', 'chiara_morelli.jpg', 'chiara-morelli'),
+(4, 'Gabriele', 'Cattaneo', 'gabriele.cattaneo@example.com', '3320123456', 'Via Carducci 6, Roma', 'gabriele_cattaneo.jpg', 'gabriele-cattaneo'),
 
 -- Ginecologia (5 nuovi dottori)
-(5, 'Claudia', 'Sartori', 'claudia.sartori@example.com', '3331234567', 'Via Manzoni 9, Venezia', 'claudia_sartori.jpg', 'claudia-sartori'),
-(5, 'Matteo', 'Leone', 'matteo.leone@example.com', '3332345678', 'Corso Italia 14, Firenze', 'matteo_leone.jpg', 'matteo-leone'),
-(5, 'Serena', 'Barone', 'serena.barone@example.com', '3333456789', 'Piazza Dante 3, Napoli', 'serena_barone.jpg', 'serena-barone'),
-(5, 'Giovanna', 'Parisi', 'giovanna.parisi@example.com', '3334567890', 'Via Petrarca 2, Palermo', 'giovanna_parisi.jpg', 'giovanna-parisi'),
-(5, 'Riccardo', 'Marini', 'riccardo.marini@example.com', '3335678901', 'Via Bellini 12, Bologna', 'riccardo_marini.jpg', 'riccardo-marini');
+(5, 'Claudia', 'Sartori', 'claudia.sartori@example.com', '3321234567', 'Via Manzoni 9, Venezia', 'claudia_sartori.jpg', 'claudia-sartori'),
+(5, 'Matteo', 'Leone', 'matteo.leone@example.com', '3322365678', 'Corso Italia 14, Firenze', 'matteo_leone.jpg', 'matteo-leone'),
+(5, 'Serena', 'Barone', 'serena.barone@example.com', '3223456789', 'Piazza Dante 3, Napoli', 'serena_barone.jpg', 'serena-barone'),
+(5, 'Giovanna', 'Parisi', 'giovanna.parisi@example.com', '3234567890', 'Via Petrarca 2, Palermo', 'giovanna_parisi.jpg', 'giovanna-parisi'),
+(5, 'Riccardo', 'Marini', 'riccardo.marini@example.com', '3225678901', 'Via Bellini 12, Bologna', 'riccardo_marini.jpg', 'riccardo-marini');
 
 -- RECENSIONI
 INSERT INTO recensioni (id_dottore, nome_paziente, voto, testo) VALUES
