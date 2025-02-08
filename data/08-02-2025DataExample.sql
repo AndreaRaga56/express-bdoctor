@@ -106,6 +106,8 @@ INSERT INTO recensioni (id_dottore, nome_paziente, voto, testo) VALUES
 (410, 'Lucia De Santis', 5, 'Ottimo ginecologo, molto rassicurante.');
 
 -- COLONNA GENERE
+ALTER TABLE dottori ADD COLUMN genere ENUM('M', 'F') NOT NULL AFTER indirizzo;
+
 UPDATE dottori 
 SET genere = CASE id
     WHEN 1 THEN 'M' -- Mario Rossi
@@ -142,7 +144,7 @@ SET genere = CASE id
 END
 WHERE id BETWEEN 391 AND 410;
 
--- COLONNA DESCRIZIONE MEDICo (SERVIZI)
+-- COLONNA DESCRIZIONE MEDICO (SERVIZI)
 ALTER TABLE dottori ADD COLUMN descrizione TEXT AFTER genere;
 
 UPDATE dottori 
