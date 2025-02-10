@@ -11,7 +11,6 @@ function getDoctors(req, res, next) {
         LEFT JOIN recensioni ON dottori.id = recensioni.id_dottore
         JOIN specializzazioni ON dottori.id_specializzazione = specializzazioni.id
         GROUP BY dottori.id
-        HAVING media_voto >= 4.5
         ORDER BY media_voto DESC, dottori.nome ASC;
     `;
 
