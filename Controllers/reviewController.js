@@ -27,7 +27,6 @@ function getReviews(req, res, next) {
 //Funzione per creare una nuova recensione 
 function createReviews(req, res, next) {
     
-    const doctorId = req.params.id;
     const slug = req.params.slug;
     const { name, vote, text } = req.body;
 
@@ -64,6 +63,8 @@ function createReviews(req, res, next) {
         if (result.length === 0) {
             return res.status(404).json({ status: 'fail', message: 'Dottore non trovato' });
         }
+
+        const doctorId = result[0].id;
         
         // Se esiste crea la recensione
         const sql = `INSERT INTO recensioni (id_dottore, nome_paziente, voto, testo) VALUES (?, ?, ?, ?)`;
