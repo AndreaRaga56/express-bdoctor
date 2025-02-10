@@ -1,6 +1,7 @@
 import express from 'express';
 const app = express();
 const port = process.env.SERVER_PORT;
+import notFound from './Middleware/notFound.js';
 import reviewsRouter from './routers/reviews.js';
 import specializationsRouter from './routers/specialization.js';
 import doctorsRouter from './routers/doctors.js';
@@ -24,6 +25,9 @@ app.use("/reviews", reviewsRouter);
 app.use("/specialization", specializationsRouter);
 
 app.use("/doctors", doctorsRouter);
+
+// Gestisce le richieste a rotte inesistenti
+app.use(notFound);
 
 
 //apre la porta del server
