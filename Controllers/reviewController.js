@@ -2,14 +2,15 @@ import connection from '../data/db.js';
 
 //Funzione per prelevare le recensioni di  un singolo dottore
 function getReviews(req, res, next) {
-    const reviewId = req.params.id;
+    // const reviewId = req.params.id;
+    const slug = req.params.slug;
     const sql = `
         SELECT recensioni.* 
         FROM recensioni
         INNER JOIN dottori ON recensioni.id_dottore = dottori.id
-        WHERE dottori.id = ?;
+        WHERE dottori.slug = ?;
         `;
-    connection.query(sql, [reviewId], (err, result) => {
+    connection.query(sql, [slug], (err, result) => {
         if (err) {
             return next(new Error(err.message));
 
@@ -26,7 +27,8 @@ function getReviews(req, res, next) {
 //Funzione per creare una nuova recensione 
 function createReviews(req, res, next) {
     
-    const doctorId = req.params.id;
+    // const doctorId = req.params.id;
+    const slug = req.params.slug;
     const { name, vote, text } = req.body;
 
     // Validazione del voto
@@ -55,7 +57,7 @@ function createReviews(req, res, next) {
 
     // Controlla se il dottore esiste
     const doctorSql = `SELECT * FROM dottori WHERE id = ?`;
-    connection.query(doctorSql, [doctorId], (err, result) => {
+    connection.query(doctorSql, [slug], (err, result) => {
         if (err) {
             return next(new Error('Errore nella query del database'));
         }
@@ -64,8 +66,8 @@ function createReviews(req, res, next) {
         }
         
         // Se esiste crea la recensione
-        const sql = `INSERT INTO recensioni (id_dottore, nome_paziente, voto, testo) VALUES (?, ?, ?, ?)`;
-        connection.query(sql, [doctorId, name, vote, text], (err, results) => {
+        const sql = `INSERT INTO recensioni (slug, nome_paziente, voto, testo) VALUES (?, ?, ?, ?)`;
+        connection.query(sql, [slug, name, vote, text], (err, results) => {
             if (err) {
                 return next(new Error('Errore nella query del database'));
             }
