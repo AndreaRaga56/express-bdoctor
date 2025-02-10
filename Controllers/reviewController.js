@@ -56,7 +56,7 @@ function createReviews(req, res, next) {
     }
 
     // Controlla se il dottore esiste
-    const doctorSql = `SELECT * FROM dottori WHERE id = ?`;
+    const doctorSql = `SELECT * FROM dottori WHERE slug = ?`;
     connection.query(doctorSql, [slug], (err, result) => {
         if (err) {
             return next(new Error('Errore nella query del database'));
