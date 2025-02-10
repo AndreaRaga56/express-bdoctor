@@ -1,5 +1,6 @@
 import connection from '../data/db.js';
 
+//Funzione per prelevare le recensioni di  un singolo dottore
 function getReviews(req, res, next) {
     const reviewId = req.params.id;
     const sql = `
@@ -21,6 +22,8 @@ function getReviews(req, res, next) {
     });
 }
 
+
+//Funzione per creare una nuova recensione 
 function createReviews(req, res, next) {
     
     const doctorId = req.params.id;

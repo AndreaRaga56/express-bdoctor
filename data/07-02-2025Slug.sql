@@ -1,3 +1,5 @@
+-- Aggiunge colonna slug
+
 ALTER TABLE dottori ADD COLUMN slug VARCHAR(255);
 
 UPDATE `bdoctor_db`.`dottori` SET `slug` = 'mario-rossi' WHERE (`id` = '1');

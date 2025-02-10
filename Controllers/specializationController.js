@@ -1,5 +1,6 @@
 import connection from '../data/db.js';
 
+// Funzione per ottenere tutte le specializzazioni
 const index = (req, res, next) => {
     const sql = `
     SELECT *

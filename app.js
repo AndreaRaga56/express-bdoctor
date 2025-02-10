@@ -12,6 +12,7 @@ app.use(corsMiddleware({
     origin:"http://localhost:5173",
 }));
 
+// gstisce i dati inviati in fomato json
 app.use(express.json());
 
 //rende accessibile la cartella public

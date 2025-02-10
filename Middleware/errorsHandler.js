@@ -1,4 +1,4 @@
-// Funzione middleware per gestire gli errori
+// Funzione middleware per gestire errore server
 const errorsHandler = (err, req, res, next) => {
     // Stampa lo stack dell'errore nella console per il debug
     console.error(err.stack);

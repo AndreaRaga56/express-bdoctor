@@ -1,6 +1,7 @@
 import connection from '../data/db.js';
 import slugify from 'slugify';
 
+// Funzione per ottenere lista dottori partendo dal voto più alto
 function getDoctors(req, res, next) {
     const sql = `
         SELECT dottori.id, dottori.nome, dottori.cognome, dottori.slug, dottori.email, dottori.telefono, 
@@ -17,16 +18,15 @@ function getDoctors(req, res, next) {
         if (err) {
             return next(new Error("Errore nel recupero dei dottori"));
         }
-
-        console.log("Dati medici inviati al frontend:", result); // 🔍 DEBUG
         return res.status(200).json({ status: "success", data: result });
     });
 }
 
-
+// Funzione per ottenere i dettagli di un singolo dottore
 function getSingleDoctor(req, res, next) {
     const slug = req.params.slug;
 
+    // include le informazioni di specializzazione
     const sql = `
         SELECT dottori.*, specializzazioni.nome AS specializzazione
         FROM dottori
@@ -34,6 +34,7 @@ function getSingleDoctor(req, res, next) {
         WHERE dottori.slug = ?;
     `;
 
+    // filtra le recensioni utilizzando l'id
     const sqlReview = `
         SELECT recensioni.id, recensioni.nome_paziente AS patient, recensioni.voto AS voto, recensioni.testo AS text
         FROM recensioni
@@ -66,6 +67,7 @@ function getSingleDoctor(req, res, next) {
     });
 }
 
+// Funzione per creare un nuovo dottore
 function createDoctor(req, res, next) {
     const { id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine } = req.body;
     const slug = slugify(nome + '-' + cognome, {
