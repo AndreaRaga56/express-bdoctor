@@ -27,7 +27,7 @@ function getReviews(req, res, next) {
 //Funzione per creare una nuova recensione 
 function createReviews(req, res, next) {
     
-    // const doctorId = req.params.id;
+    const doctorId = req.params.id;
     const slug = req.params.slug;
     const { name, vote, text } = req.body;
 
@@ -66,8 +66,8 @@ function createReviews(req, res, next) {
         }
         
         // Se esiste crea la recensione
-        const sql = `INSERT INTO recensioni (slug, nome_paziente, voto, testo) VALUES (?, ?, ?, ?)`;
-        connection.query(sql, [slug, name, vote, text], (err, results) => {
+        const sql = `INSERT INTO recensioni (id_dottore, nome_paziente, voto, testo) VALUES (?, ?, ?, ?)`;
+        connection.query(sql, [doctorId, name, vote, text], (err, results) => {
             if (err) {
                 return next(new Error('Errore nella query del database'));
             }
