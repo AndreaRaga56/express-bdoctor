@@ -11,7 +11,7 @@ const storage = multer.diskStorage({
         //prende nome del file
         const originalFileName = file.originalname;
         //nome non ripetuto per timestamp
-        const uniqueName = `${Date.now()}-${originalFileName}}`;
+        const uniqueName = `${Date.now()}-${originalFileName}`;
         callbackf(null, uniqueName)
     }
 })
