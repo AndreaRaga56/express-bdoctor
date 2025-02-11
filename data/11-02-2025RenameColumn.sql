@@ -1,24 +1,28 @@
---Rinomina colonne :
+-- Rinomina colonne :
 
---dottori
+-- dottori
+ALTER TABLE dottori RENAME COLUMN nome TO first_name;
+ALTER TABLE dottori RENAME COLUMN cognome TO last_name;
+ALTER TABLE dottori RENAME COLUMN telefono TO phone;
+ALTER TABLE dottori RENAME COLUMN indirizzo TO address;
 ALTER TABLE dottori RENAME COLUMN descrizione TO description;
 ALTER TABLE dottori RENAME COLUMN immagine TO image;
 ALTER TABLE dottori RENAME COLUMN genere TO gender;
 ALTER TABLE dottori RENAME COLUMN id_specializzazione TO id_specialization;
 
---specializazioni
+-- specializazioni
 ALTER TABLE specializzazioni RENAME COLUMN nome TO name;
 
---recensioni
+-- recensioni
 ALTER TABLE recensioni  RENAME COLUMN id_dottore TO id_doctor;
 ALTER TABLE recensioni  RENAME COLUMN nome_paziente TO patient_name;
 ALTER TABLE recensioni  RENAME COLUMN voto TO rating;
 ALTER TABLE recensioni  RENAME COLUMN testo TO content;
 
---Aggiunge colonna email nelle recensioni
+-- Aggiunge colonna email nelle recensioni
 ALTER TABLE recensioni ADD COLUMN email VARCHAR(255) NOT NULL;
 
---tuple email generate (VERIFICARE ID SUL DB)
+-- tuple email generate (VERIFICARE ID SUL DB)
 UPDATE recensioni SET email = 'amelia.greenwood@example.com' WHERE id = 1;
 UPDATE recensioni SET email = 'luca.martelli@example.com' WHERE id = 2;
 UPDATE recensioni SET email = 'aurora.borealis@example.com' WHERE id = 3;
@@ -68,5 +72,5 @@ RENAME TABLE specializzazioni TO specializations;
 RENAME TABLE recensioni TO reviews;
 
 
---modificare valore di genere in enum
+-- modificare valore di genere in enum
 ALTER TABLE doctors MODIFY COLUMN gender ENUM('M', 'F', 'X') NOT NULL;
