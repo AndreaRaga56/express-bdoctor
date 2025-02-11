@@ -72,7 +72,8 @@ function getSingleDoctor(req, res, next) {
 
 // Funzione per creare un nuovo dottore
 function createDoctor(req, res, next) {
-    const { id_specialization, first_name, last_name, email, phone, address, image, gender, description } = req.body;
+    const image = req.file?.filename;
+    const { id_specialization, first_name, last_name, email, phone, address, gender, description } = req.body;
     const slug = slugify(first_name + '-' + last_name, {
         lower: true,
         strict: true,
