@@ -107,6 +107,18 @@ function createDoctor(req, res, next) {
         return res.status(400).json({ status: "error", message: "Il numero di telefono non è valido." });
     }
 
+    //Verifica se il telfono già esiste
+    const checkPhoneSql = "SELECT id FROM doctors WHERE phone = ?"
+    connection.query(checkPhoneSql, [phone], (err, result) => {
+        if (err) {
+            return next(new Error(err.message));
+        }
+
+        if (result.length > 0) {
+            return res.status(400).json({ status: "error", message: "Numero di telefono già registrato" });
+        }
+    })
+
     // Validazione indirizzo
     if (typeof address !== 'string' || address.trim().length <= 5) {
         return res.status(400).json({
@@ -133,7 +145,7 @@ function createDoctor(req, res, next) {
     })
 
     const sql = `
-        INSERT INTO dottori (id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug) 
+        INSERT INTO doctors (id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     `;
 
