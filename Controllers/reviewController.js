@@ -5,10 +5,10 @@ function getReviews(req, res, next) {
     // const reviewId = req.params.id;
     const slug = req.params.slug;
     const sql = `
-        SELECT recensioni.* 
-        FROM recensioni
-        INNER JOIN dottori ON recensioni.id_dottore = dottori.id
-        WHERE dottori.slug = ?;
+        SELECT reviews.* 
+        FROM reviews
+        INNER JOIN doctors ON reviews.id_doctor = doctors.id
+        WHERE doctors.slug = ?;
         `;
     connection.query(sql, [slug], (err, result) => {
         if (err) {
@@ -28,10 +28,10 @@ function getReviews(req, res, next) {
 function createReviews(req, res, next) {
     
     const slug = req.params.slug;
-    const { name, vote, text } = req.body;
+    const { patient_name, rating, content, email } = req.body;
 
     // Validazione del voto
-    if (isNaN(vote) || vote < 0 || vote > 5) {
+    if (isNaN(rating) || rating < 0 || rating > 5) {
         return res.status(400).json({
             status: 'fail',
             message: 'Il voto deve essere un valore numerico tra 0 e 5'
@@ -39,7 +39,7 @@ function createReviews(req, res, next) {
     }
 
     // Validazione del nome
-    if (typeof name !== 'string' || name.trim().length <= 3) {
+    if (typeof patient_name !== 'string' || patient_name.trim().length <= 3) {
         return res.status(400).json({
             status: 'fail',
             message: 'Il nome deve avere più di 3 caratteri'
@@ -47,15 +47,20 @@ function createReviews(req, res, next) {
     }
 
     // Validazione del testo
-    if (text && text.trim().length > 0 && text.trim().length < 5) {
+    if (content && content.trim().length > 0 && content.trim().length < 5) {
         return res.status(400).json({
             status: 'fail',
             message: 'Il testo deve essere lungo almeno 6 caratteri'
         });
     }
 
+    // Validazione email
+    if (!email.includes('@')) {
+        return res.status(400).json({ status: "error", message: "La mail inserita non è valida" });
+    }
+
     // Controlla se il dottore esiste
-    const doctorSql = `SELECT * FROM dottori WHERE slug = ?`;
+    const doctorSql = `SELECT * FROM doctors WHERE slug = ?`;
     connection.query(doctorSql, [slug], (err, result) => {
         if (err) {
             return next(new Error('Errore nella query del database'));
@@ -67,8 +72,8 @@ function createReviews(req, res, next) {
         const doctorId = result[0].id;
         
         // Se esiste crea la recensione
-        const sql = `INSERT INTO recensioni (id_dottore, nome_paziente, voto, testo) VALUES (?, ?, ?, ?)`;
-        connection.query(sql, [doctorId, name, vote, text], (err, results) => {
+        const sql = `INSERT INTO recensioni (id_doctor, patient_name, rating, content) VALUES (?, ?, ?, ?)`;
+        connection.query(sql, [doctorId, patient_name, rating, content], (err, results) => {
             if (err) {
                 return next(new Error('Errore nella query del database'));
             }
