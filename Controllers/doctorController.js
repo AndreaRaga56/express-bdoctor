@@ -4,14 +4,15 @@ import slugify from 'slugify';
 // Funzione per ottenere lista dottori partendo dal voto più alto
 function getDoctors(req, res, next) {
     const sql = `
-        SELECT dottori.id, dottori.nome, dottori.cognome, dottori.slug, dottori.email, dottori.telefono, 
-               dottori.indirizzo, dottori.immagine, specializzazioni.nome AS specializzazione,
-               ROUND(IFNULL(AVG(recensioni.voto), 0), 2) AS media_voto
-        FROM dottori
-        LEFT JOIN recensioni ON dottori.id = recensioni.id_dottore
-        JOIN specializzazioni ON dottori.id_specializzazione = specializzazioni.id
-        GROUP BY dottori.id
-        ORDER BY media_voto DESC, dottori.nome ASC;
+        SELECT doctors.id, doctors.first_name, doctors.last_name, doctors.slug, doctors.email, doctors.phone, 
+       doctors.address, doctors.image, specializations.name AS specialization,
+       ROUND(IFNULL(AVG(reviews.rating), 0), 2) AS average_rating
+       FROM doctors
+       LEFT JOIN reviews ON doctors.id = reviews.id_doctor
+       JOIN specializations ON doctors.id_specialization = specializations.id
+       GROUP BY doctors.id
+       ORDER BY average_rating DESC, doctors.first_name ASC;
+
     `;
 
     connection.query(sql, (err, result) => {
@@ -28,17 +29,19 @@ function getSingleDoctor(req, res, next) {
 
     // include le informazioni di specializzazione
     const sql = `
-        SELECT dottori.*, specializzazioni.nome AS specializzazione
-        FROM dottori
-        LEFT JOIN specializzazioni ON dottori.id_specializzazione = specializzazioni.id
-        WHERE dottori.slug = ?;
+       SELECT doctors.*, specializations.name AS specialization
+       FROM doctors
+       LEFT JOIN specializations ON doctors.id_specialization = specializations.id
+       WHERE doctors.slug = ?;
+
     `;
 
     // filtra le recensioni utilizzando l'id
     const sqlReview = `
-        SELECT recensioni.id, recensioni.nome_paziente AS patient, recensioni.voto AS voto, recensioni.testo AS text
-        FROM recensioni
-        WHERE recensioni.id_dottore = ?;
+        SELECT reviews.id, reviews.patient_name AS patient, reviews.rating AS rating, reviews.text AS text
+        FROM reviews
+        WHERE reviews.id_doctor = ?;
+
     `;
 
     connection.query(sql, [slug], (err, result) => {
@@ -69,8 +72,8 @@ function getSingleDoctor(req, res, next) {
 
 // Funzione per creare un nuovo dottore
 function createDoctor(req, res, next) {
-    const { id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine } = req.body;
-    const slug = slugify(nome + '-' + cognome, {
+    const { id_specialization, first_name, last_name, email, phone, address, image, gender, description } = req.body;
+    const slug = slugify(first_name + '-' + last_name, {
         lower: true,
         strict: true,
     });
@@ -78,12 +81,12 @@ function createDoctor(req, res, next) {
     //Validazioni
 
     //Tutti i campi sono obbligatori
-    if (!id_specializzazione || !nome || !cognome || !email || !telefono || !indirizzo || !immagine) {
+    if (!id_specialization || !first_name || !last_name || !email || !phone || !address || !image || !description || !gender) {
         return res.status(400).json({ status: "error", message: "Tutti i campi sono obbligatori" });
     }
 
     // Validazione del nome
-    if (typeof nome !== 'string' || nome.trim().length <= 3) {
+    if (typeof first_name !== 'string' || first_name.trim().length <= 3) {
         return res.status(400).json({
             status: 'fail',
             message: 'Il nome deve avere più di 3 caratteri'
@@ -91,7 +94,7 @@ function createDoctor(req, res, next) {
     }
 
     // Validazione del cognome
-    if (typeof cognome !== 'string' || cognome.trim().length <= 3) {
+    if (typeof last_name !== 'string' || last_name.trim().length <= 3) {
         return res.status(400).json({
             status: 'fail',
             message: 'Il cognome deve avere più di 3 caratteri'
@@ -100,12 +103,12 @@ function createDoctor(req, res, next) {
 
     // Verifica se il numero di telefono è valido
     const phoneRegex = /^\+?[0-9]{1,15}$/;
-    if (!phoneRegex.test(telefono)) {
+    if (!phoneRegex.test(phone)) {
         return res.status(400).json({ status: "error", message: "Il numero di telefono non è valido." });
     }
 
     // Validazione indirizzo
-    if (typeof indirizzo !== 'string' || indirizzo.trim().length <= 5) {
+    if (typeof address !== 'string' || address.trim().length <= 5) {
         return res.status(400).json({
             status: 'fail',
             message: "L'indirizzo deve avere più di 5 caratteri"
@@ -118,7 +121,7 @@ function createDoctor(req, res, next) {
     }
 
     //Verifica se la mail già esiste
-    const checkEmailSql = "SELECT id FROM dottori WHERE email = ?"
+    const checkEmailSql = "SELECT id FROM doctors WHERE email = ?"
     connection.query(checkEmailSql, [email], (err, result) => {
         if (err) {
             return next(new Error(err.message));
@@ -130,11 +133,11 @@ function createDoctor(req, res, next) {
     })
 
     const sql = `
-        INSERT INTO dottori (id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine, slug) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+        INSERT INTO dottori (id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     `;
 
-    connection.query(sql, [id_specializzazione, nome, cognome, email, telefono, indirizzo, immagine, slug], (err, result) => {
+    connection.query(sql, [id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug], (err, result) => {
         if (err) {
             return next(new Error("Errore durante la creazione del dottore"));
         }

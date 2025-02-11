@@ -4,7 +4,7 @@ import connection from '../data/db.js';
 const index = (req, res, next) => {
     const sql = `
     SELECT *
-    FROM specializzazioni
+    FROM specialization
     `
 
     connection.query(sql, (err, results, next) => {
