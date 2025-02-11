@@ -1,6 +1,10 @@
 -- Rinomina colonne :
 
 -- dottori
+ALTER TABLE dottori RENAME COLUMN nome TO first_name;
+ALTER TABLE dottori RENAME COLUMN cognome TO last_name;
+ALTER TABLE dottori RENAME COLUMN telefono TO phone;
+ALTER TABLE dottori RENAME COLUMN indirizzo TO address;
 ALTER TABLE dottori RENAME COLUMN descrizione TO description;
 ALTER TABLE dottori RENAME COLUMN immagine TO image;
 ALTER TABLE dottori RENAME COLUMN genere TO gender;
