@@ -10,6 +10,6 @@ routers.get("/", doctorController.getDoctors);
 routers.get("/:slug", doctorController.getSingleDoctor);
 
 //Create
-routers.post("/", upload.single('immagine'), doctorController.createDoctor);
+routers.post("/", upload.single('image'), doctorController.createDoctor);
 
 export default routers;
