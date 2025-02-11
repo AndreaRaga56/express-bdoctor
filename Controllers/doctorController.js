@@ -71,93 +71,178 @@ function getSingleDoctor(req, res, next) {
 }
 
 // Funzione per creare un nuovo dottore
+// function createDoctor(req, res, next) {
+//     const image = req.file?.filename;
+//     const { id_specialization, first_name, last_name, email, phone, address, gender, description } = req.body;
+//     const slug = slugify(first_name + '-' + last_name, {
+//         lower: true,
+//         strict: true,
+//     });
+
+//     //Validazioni
+
+//     // //Tutti i campi sono obbligatori
+//     // if (!id_specialization || !first_name || !last_name || !email || !phone || !address || !image || !description || !gender) {
+//     //     return res.status(400).json({ status: "error", message: "Tutti i campi sono obbligatori" });
+//     // }
+
+//     // Validazione del nome
+//     if (typeof first_name !== 'string' || first_name.trim().length <= 3) {
+//         return res.status(400).json({
+//             status: 'fail',
+//             message: 'Il nome deve avere più di 3 caratteri'
+//         });
+//     }
+
+//     // Validazione del cognome
+//     if (typeof last_name !== 'string' || last_name.trim().length <= 3) {
+//         return res.status(400).json({
+//             status: 'fail',
+//             message: 'Il cognome deve avere più di 3 caratteri'
+//         });
+//     }
+
+//     // Verifica se il numero di telefono è valido
+//     const phoneRegex = /^\+?[0-9]{1,15}$/;
+//     if (!phoneRegex.test(phone)) {
+//         return res.status(400).json({ status: "error", message: "Il numero di telefono non è valido." });
+//     }
+
+//     //Verifica se il telfono già esiste
+//     const checkPhoneSql = "SELECT id FROM doctors WHERE phone = ?"
+//     connection.query(checkPhoneSql, [phone], (err, result) => {
+//         if (err) {
+//             return next(new Error(err.message));
+//         }
+
+//         if (result.length > 0) {
+//             return res.status(400).json({ status: "error", message: "Numero di telefono già registrato" });
+//         }
+//     })
+
+//     // Validazione indirizzo
+//     if (typeof address !== 'string' || address.trim().length <= 5) {
+//         return res.status(400).json({
+//             status: 'fail',
+//             message: "L'indirizzo deve avere più di 5 caratteri"
+//         });
+//     }
+
+//     // Validazione email
+//     if (!email.includes('@')) {
+//         return res.status(400).json({ status: "error", message: "La mail inserita non è valida" });
+//     }
+
+//     //Verifica se la mail già esiste
+//     const checkEmailSql = "SELECT id FROM doctors WHERE email = ?"
+//     connection.query(checkEmailSql, [email], (err, result) => {
+//         if (err) {
+//             return next(new Error(err.message));
+//         }
+
+//         if (result.length > 0) {
+//             return res.status(400).json({ status: "error", message: "Email già registrata" });
+//         }
+//     })
+
+//     const sql = `
+//         INSERT INTO doctors (id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug) 
+//         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+//     `;
+
+//     connection.query(sql, [id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug], (err, result) => {
+//         if (err) {
+//             return next(new Error("Errore durante la creazione del dottore"));
+//         }
+
+//         res.status(201).json({ status: "success", message: "Dottore creato con successo", id: result.insertId });
+//     });
+// }
+
+
+
 function createDoctor(req, res, next) {
-    const image = req.file?.filename;
+    const image = req.file?.filename || null; // `image` facoltativo
     const { id_specialization, first_name, last_name, email, phone, address, gender, description } = req.body;
-    const slug = slugify(first_name + '-' + last_name, {
-        lower: true,
-        strict: true,
-    });
+    const slug = slugify(first_name + '-' + last_name, { lower: true, strict: true });
 
-    //Validazioni
+    // Log dei dati ricevuti
+    console.log('Dati ricevuti:', { id_specialization, first_name, last_name, email, phone, address, gender, description, image, slug });
 
-    //Tutti i campi sono obbligatori
-    if (!id_specialization || !first_name || !last_name || !email || !phone || !address || !image || !description || !gender) {
+    // Validazioni
+    if (!id_specialization || !first_name || !last_name || !email || !phone || !address || !description || !gender) {
+        console.log('Validazione fallita - Campi mancanti:', { id_specialization, first_name, last_name, email, phone, address, description, gender });
         return res.status(400).json({ status: "error", message: "Tutti i campi sono obbligatori" });
     }
 
-    // Validazione del nome
     if (typeof first_name !== 'string' || first_name.trim().length <= 3) {
-        return res.status(400).json({
-            status: 'fail',
-            message: 'Il nome deve avere più di 3 caratteri'
-        });
+        return res.status(400).json({ status: 'fail', message: 'Il nome deve avere più di 3 caratteri' });
     }
 
-    // Validazione del cognome
     if (typeof last_name !== 'string' || last_name.trim().length <= 3) {
-        return res.status(400).json({
-            status: 'fail',
-            message: 'Il cognome deve avere più di 3 caratteri'
-        });
+        return res.status(400).json({ status: 'fail', message: 'Il cognome deve avere più di 3 caratteri' });
     }
 
-    // Verifica se il numero di telefono è valido
     const phoneRegex = /^\+?[0-9]{1,15}$/;
     if (!phoneRegex.test(phone)) {
+        console.log('Validazione numero di telefono fallita:', phone);
         return res.status(400).json({ status: "error", message: "Il numero di telefono non è valido." });
     }
 
-    //Verifica se il telfono già esiste
-    const checkPhoneSql = "SELECT id FROM doctors WHERE phone = ?"
-    connection.query(checkPhoneSql, [phone], (err, result) => {
-        if (err) {
-            return next(new Error(err.message));
-        }
-
-        if (result.length > 0) {
-            return res.status(400).json({ status: "error", message: "Numero di telefono già registrato" });
-        }
-    })
-
-    // Validazione indirizzo
     if (typeof address !== 'string' || address.trim().length <= 5) {
-        return res.status(400).json({
-            status: 'fail',
-            message: "L'indirizzo deve avere più di 5 caratteri"
-        });
+        console.log('Validazione indirizzo fallita:', address);
+        return res.status(400).json({ status: 'fail', message: "L'indirizzo deve avere più di 5 caratteri" });
     }
 
-    // Validazione email
     if (!email.includes('@')) {
+        console.log('Validazione email fallita:', email);
         return res.status(400).json({ status: "error", message: "La mail inserita non è valida" });
     }
 
-    //Verifica se la mail già esiste
-    const checkEmailSql = "SELECT id FROM doctors WHERE email = ?"
-    connection.query(checkEmailSql, [email], (err, result) => {
+    // Verifica se il numero di telefono già esiste
+    const checkPhoneSql = "SELECT id FROM doctors WHERE phone = ?";
+    connection.query(checkPhoneSql, [phone], (err, phoneResult) => {
         if (err) {
+            console.log('Errore durante la verifica del telefono:', err.message);
             return next(new Error(err.message));
         }
 
-        if (result.length > 0) {
-            return res.status(400).json({ status: "error", message: "Email già registrata" });
-        }
-    })
-
-    const sql = `
-        INSERT INTO doctors (id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-    `;
-
-    connection.query(sql, [id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug], (err, result) => {
-        if (err) {
-            return next(new Error("Errore durante la creazione del dottore"));
+        if (phoneResult.length > 0) {
+            return res.status(400).json({ status: "error", message: "Numero di telefono già registrato" });
         }
 
-        res.status(201).json({ status: "success", message: "Dottore creato con successo", id: result.insertId });
+        // Verifica se l'email già esiste
+        const checkEmailSql = "SELECT id FROM doctors WHERE email = ?";
+        connection.query(checkEmailSql, [email], (err, emailResult) => {
+            if (err) {
+                console.log('Errore durante la verifica dell\'email:', err.message);
+                return next(new Error(err.message));
+            }
+
+            if (emailResult.length > 0) {
+                return res.status(400).json({ status: "error", message: "Email già registrata" });
+            }
+
+            // Query di inserimento
+            const sql = `
+                INSERT INTO doctors (id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            `;
+
+            connection.query(sql, [id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug], (err, result) => {
+                if (err) {
+                    console.error('Errore durante la creazione del dottore:', err.message);
+                    return next(new Error("Errore durante la creazione del dottore"));
+                }
+
+                console.log('Dottore creato con successo:', result.insertId);
+                res.status(201).json({ status: "success", message: "Dottore creato con successo", id: result.insertId });
+            });
+        });
     });
 }
+
+
 
 export default {
     getDoctors,
