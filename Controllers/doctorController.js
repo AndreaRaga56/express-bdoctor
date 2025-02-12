@@ -29,11 +29,14 @@ function getSingleDoctor(req, res, next) {
 
     // include le informazioni di specializzazione
     const sql = `
-       SELECT doctors.*, specializations.name AS specialization
+       SELECT doctors.*, 
+       specializations.name AS specialization,
+       ROUND(IFNULL(AVG(reviews.rating), 0), 2) AS average_rating
        FROM doctors
        LEFT JOIN specializations ON doctors.id_specialization = specializations.id
-       WHERE doctors.slug = ?;
-
+       LEFT JOIN reviews ON doctors.id = reviews.id_doctor
+       WHERE doctors.slug = ?
+       GROUP BY doctors.id, specializations.name;
     `;
 
     // filtra le recensioni utilizzando l'id
