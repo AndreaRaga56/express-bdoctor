@@ -39,7 +39,7 @@ function createReviews(req, res, next) {
     }
 
     // Validazione del nome
-    if (typeof patient_name !== 'string' || patient_name.trim().length <= 3) {
+    if (typeof patient_name !== 'string' || patient_name.trim().length < 3) {
         return res.status(400).json({
             status: 'fail',
             message: 'Il nome deve avere più di 3 caratteri'
@@ -50,7 +50,7 @@ function createReviews(req, res, next) {
     if (content && content.trim().length > 0 && content.trim().length < 5) {
         return res.status(400).json({
             status: 'fail',
-            message: 'Il testo deve essere lungo almeno 6 caratteri'
+            message: 'Il testo deve essere lungo almeno 5 caratteri'
         });
     }
 

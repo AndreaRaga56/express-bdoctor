@@ -93,17 +93,17 @@ function createDoctor(req, res, next) {
     }
 
     // Validazione del nome
-    if (typeof first_name !== 'string' || first_name.trim().length <= 3) {
+    if (typeof first_name !== 'string' || first_name.trim().length < 3) {
         return res.status(400).json({ status: 'fail', message: 'Il nome deve avere più di 3 caratteri' });
     }
 
     // Validazione del cognome
-    if (typeof last_name !== 'string' || last_name.trim().length <= 3) {
+    if (typeof last_name !== 'string' || last_name.trim().length < 3) {
         return res.status(400).json({ status: 'fail', message: 'Il cognome deve avere più di 3 caratteri' });
     }
 
     // Validazione descrizione
-    if (typeof description !== 'string' || description.trim().length <= 6) {
+    if (typeof description !== 'string' || description.trim().length < 6) {
         return res.status(400).json({ status: 'fail', message: 'La descrizione deve avere più di 6 caratteri' });
     }
 
@@ -115,7 +115,7 @@ function createDoctor(req, res, next) {
     }
 
     //Validazione indirizzo
-    if (typeof address !== 'string' || address.trim().length <= 5) {
+    if (typeof address !== 'string' || address.trim().length < 5) {
         console.log('Validazione indirizzo fallita:', address);
         return res.status(400).json({ status: 'fail', message: "L'indirizzo deve avere più di 5 caratteri" });
     }
