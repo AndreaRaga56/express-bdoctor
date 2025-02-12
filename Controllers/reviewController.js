@@ -82,7 +82,7 @@ function createReviews(req, res, next) {
 
             // Dopo aver aggiunto la recensione, invia la mail con Mailtrap
             const mailOptions = {
-                from: 'noreply@example.com',
+                from: `${email}`,
                 to: doctorEmail,
                 subject: 'Hai ricevuto una nuova recensione!',
                 text: `Ciao, hai ricevuto una nuova recensione da ${patient_name}.\n\n` +
