@@ -102,6 +102,11 @@ function createDoctor(req, res, next) {
         return res.status(400).json({ status: 'fail', message: 'Il cognome deve avere più di 3 caratteri' });
     }
 
+    // Validazione descrizione
+    if (typeof description !== 'string' || description.trim().length <= 6) {
+        return res.status(400).json({ status: 'fail', message: 'La descrizione deve avere più di 6 caratteri' });
+    }
+
     // Verifica se il numero di telefono è valido
     const phoneRegex = /^\+?[0-9]{1,15}$/;
     if (!phoneRegex.test(phone)) {
