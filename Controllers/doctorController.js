@@ -38,7 +38,7 @@ function getSingleDoctor(req, res, next) {
 
     // filtra le recensioni utilizzando l'id
     const sqlReview = `
-        SELECT reviews.id, reviews.patient_name, reviews.rating AS rating, reviews.content reviews.email
+        SELECT reviews.id, reviews.patient_name, reviews.rating AS rating, reviews.content, reviews.email
         FROM reviews
         WHERE reviews.id_doctor = ?;
 
