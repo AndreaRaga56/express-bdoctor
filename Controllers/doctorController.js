@@ -70,130 +70,48 @@ function getSingleDoctor(req, res, next) {
     });
 }
 
+
 // Funzione per creare un nuovo dottore
-// function createDoctor(req, res, next) {
-//     const image = req.file?.filename;
-//     const { id_specialization, first_name, last_name, email, phone, address, gender, description } = req.body;
-//     const slug = slugify(first_name + '-' + last_name, {
-//         lower: true,
-//         strict: true,
-//     });
-
-//     //Validazioni
-
-//     // //Tutti i campi sono obbligatori
-//     // if (!id_specialization || !first_name || !last_name || !email || !phone || !address || !image || !description || !gender) {
-//     //     return res.status(400).json({ status: "error", message: "Tutti i campi sono obbligatori" });
-//     // }
-
-//     // Validazione del nome
-//     if (typeof first_name !== 'string' || first_name.trim().length <= 3) {
-//         return res.status(400).json({
-//             status: 'fail',
-//             message: 'Il nome deve avere più di 3 caratteri'
-//         });
-//     }
-
-//     // Validazione del cognome
-//     if (typeof last_name !== 'string' || last_name.trim().length <= 3) {
-//         return res.status(400).json({
-//             status: 'fail',
-//             message: 'Il cognome deve avere più di 3 caratteri'
-//         });
-//     }
-
-//     // Verifica se il numero di telefono è valido
-//     const phoneRegex = /^\+?[0-9]{1,15}$/;
-//     if (!phoneRegex.test(phone)) {
-//         return res.status(400).json({ status: "error", message: "Il numero di telefono non è valido." });
-//     }
-
-//     //Verifica se il telfono già esiste
-//     const checkPhoneSql = "SELECT id FROM doctors WHERE phone = ?"
-//     connection.query(checkPhoneSql, [phone], (err, result) => {
-//         if (err) {
-//             return next(new Error(err.message));
-//         }
-
-//         if (result.length > 0) {
-//             return res.status(400).json({ status: "error", message: "Numero di telefono già registrato" });
-//         }
-//     })
-
-//     // Validazione indirizzo
-//     if (typeof address !== 'string' || address.trim().length <= 5) {
-//         return res.status(400).json({
-//             status: 'fail',
-//             message: "L'indirizzo deve avere più di 5 caratteri"
-//         });
-//     }
-
-//     // Validazione email
-//     if (!email.includes('@')) {
-//         return res.status(400).json({ status: "error", message: "La mail inserita non è valida" });
-//     }
-
-//     //Verifica se la mail già esiste
-//     const checkEmailSql = "SELECT id FROM doctors WHERE email = ?"
-//     connection.query(checkEmailSql, [email], (err, result) => {
-//         if (err) {
-//             return next(new Error(err.message));
-//         }
-
-//         if (result.length > 0) {
-//             return res.status(400).json({ status: "error", message: "Email già registrata" });
-//         }
-//     })
-
-//     const sql = `
-//         INSERT INTO doctors (id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug) 
-//         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-//     `;
-
-//     connection.query(sql, [id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug], (err, result) => {
-//         if (err) {
-//             return next(new Error("Errore durante la creazione del dottore"));
-//         }
-
-//         res.status(201).json({ status: "success", message: "Dottore creato con successo", id: result.insertId });
-//     });
-// }
-
-
-
 function createDoctor(req, res, next) {
+    // utilizza l'operatore di optional chaining (?.) per accedere alla proprietà filename dell'oggetto req.file
     const image = req.file?.filename || null; // `image` facoltativo
     const { id_specialization, first_name, last_name, email, phone, address, gender, description } = req.body;
     const slug = slugify(first_name + '-' + last_name, { lower: true, strict: true });
 
-    // Log dei dati ricevuti
+    // debug dati ricevuti
     console.log('Dati ricevuti:', { id_specialization, first_name, last_name, email, phone, address, gender, description, image, slug });
 
     // Validazioni
+
+    //Cambi obbligatori
     if (!id_specialization || !first_name || !last_name || !email || !phone || !address || !description || !gender) {
         console.log('Validazione fallita - Campi mancanti:', { id_specialization, first_name, last_name, email, phone, address, description, gender });
         return res.status(400).json({ status: "error", message: "Tutti i campi sono obbligatori" });
     }
 
+    // Validazione del nome
     if (typeof first_name !== 'string' || first_name.trim().length <= 3) {
         return res.status(400).json({ status: 'fail', message: 'Il nome deve avere più di 3 caratteri' });
     }
 
+    // Validazione del cognome
     if (typeof last_name !== 'string' || last_name.trim().length <= 3) {
         return res.status(400).json({ status: 'fail', message: 'Il cognome deve avere più di 3 caratteri' });
     }
 
+    // Verifica se il numero di telefono è valido
     const phoneRegex = /^\+?[0-9]{1,15}$/;
     if (!phoneRegex.test(phone)) {
         console.log('Validazione numero di telefono fallita:', phone);
         return res.status(400).json({ status: "error", message: "Il numero di telefono non è valido." });
     }
 
+    //Validazione indirizzo
     if (typeof address !== 'string' || address.trim().length <= 5) {
         console.log('Validazione indirizzo fallita:', address);
         return res.status(400).json({ status: 'fail', message: "L'indirizzo deve avere più di 5 caratteri" });
     }
-
+    // Verifica se l'email è valida
     if (!email.includes('@')) {
         console.log('Validazione email fallita:', email);
         return res.status(400).json({ status: "error", message: "La mail inserita non è valida" });
@@ -223,7 +141,7 @@ function createDoctor(req, res, next) {
                 return res.status(400).json({ status: "error", message: "Email già registrata" });
             }
 
-            // Query di inserimento
+            // Se i campi sono validi e l'email e il telefono non sono registrati procede con la query di creazione
             const sql = `
                 INSERT INTO doctors (id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
