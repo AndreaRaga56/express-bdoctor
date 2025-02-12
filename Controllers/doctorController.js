@@ -73,20 +73,48 @@ function getSingleDoctor(req, res, next) {
     });
 }
 
-
-// Funzione per creare un nuovo dottore
 function createDoctor(req, res, next) {
     // utilizza l'operatore di optional chaining (?.) per accedere alla proprietà filename dell'oggetto req.file
     const image = req.file?.filename || null; // `image` facoltativo
-    const { id_specialization, first_name, last_name, email, phone, address, gender, description } = req.body;
+    const { id_specialization, first_name, last_name, email, phone, address, gender, description, emailOnly, phoneOnly } = req.body;
     const slug = slugify(first_name + '-' + last_name, { lower: true, strict: true });
 
     // debug dati ricevuti
     console.log('Dati ricevuti:', { id_specialization, first_name, last_name, email, phone, address, gender, description, image, slug });
 
+    // Verifica se è una richiesta di solo controllo dell'email
+    if (emailOnly) {
+        const checkEmailSql = "SELECT id FROM doctors WHERE email = ?";
+        connection.query(checkEmailSql, [emailOnly], (err, emailResult) => {
+            if (err) {
+                console.log('Errore durante la verifica dell\'email:', err.message);
+                return res.status(500).json({ error: err.message });
+            }
+
+            const emailExists = emailResult.length > 0;
+            return res.json({ exists: emailExists });
+        });
+        return;
+    }
+
+    // Verifica se è una richiesta di solo controllo del telefono
+    if (phoneOnly) {
+        const checkPhoneSql = "SELECT id FROM doctors WHERE phone = ?";
+        connection.query(checkPhoneSql, [phoneOnly], (err, phoneResult) => {
+            if (err) {
+                console.log('Errore durante la verifica del telefono:', err.message);
+                return res.status(500).json({ error: err.message });
+            }
+
+            const phoneExists = phoneResult.length > 0;
+            return res.json({ exists: phoneExists });
+        });
+        return;
+    }
+
     // Validazioni
 
-    //Cambi obbligatori
+    // Campi obbligatori
     if (!id_specialization || !first_name || !last_name || !email || !phone || !address || !description || !gender) {
         console.log('Validazione fallita - Campi mancanti:', { id_specialization, first_name, last_name, email, phone, address, description, gender });
         return res.status(400).json({ status: "error", message: "Tutti i campi sono obbligatori" });
@@ -114,11 +142,12 @@ function createDoctor(req, res, next) {
         return res.status(400).json({ status: "error", message: "Il numero di telefono non è valido." });
     }
 
-    //Validazione indirizzo
+    // Validazione indirizzo
     if (typeof address !== 'string' || address.trim().length < 5) {
         console.log('Validazione indirizzo fallita:', address);
         return res.status(400).json({ status: 'fail', message: "L'indirizzo deve avere più di 5 caratteri" });
     }
+
     // Verifica se l'email è valida
     if (!email.includes('@')) {
         console.log('Validazione email fallita:', email);
@@ -167,6 +196,7 @@ function createDoctor(req, res, next) {
         });
     });
 }
+
 
 
 
