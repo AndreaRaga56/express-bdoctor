@@ -1,4 +1,5 @@
 import connection from '../data/db.js';
+import transporter from '../data/sendMail.js';
 
 //Funzione per prelevare le recensioni di  un singolo dottore
 function getReviews(req, res, next) {
@@ -26,7 +27,7 @@ function getReviews(req, res, next) {
 
 //Funzione per creare una nuova recensione 
 function createReviews(req, res, next) {
-    
+
     const slug = req.params.slug;
     const { patient_name, rating, content, email } = req.body;
 
@@ -70,16 +71,40 @@ function createReviews(req, res, next) {
         }
 
         const doctorId = result[0].id;
-        
+        const doctorEmail = result[0].email;
+
         // Se esiste crea la recensione
         const sql = `INSERT INTO reviews (id_doctor, patient_name, rating, content, email) VALUES (?, ?, ?, ?, ?)`;
         connection.query(sql, [doctorId, patient_name, rating, content, email], (err, results) => {
             if (err) {
                 return next(new Error('Errore nella query del database'));
             }
-            res.status(201).json({ 
-                status: 'success', 
-                message: 'Recensione aggiunta' 
+
+            // Dopo aver aggiunto la recensione, invia la mail con Mailtrap
+            const mailOptions = {
+                from: 'noreply@example.com',
+                to: doctorEmail,
+                subject: 'Hai ricevuto una nuova recensione!',
+                text: `Ciao, hai ricevuto una nuova recensione da ${patient_name}.\n\n` +
+                    `Voto: ${rating}/5\n` +
+                    `Testo: ${content}\n\n` +
+                    `Email del paziente: ${email}`,
+            };
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error('Errore durante l\'invio dell\'email:', error);
+                    return res.status(500).json({
+                        status: 'error',
+                        message: 'Recensione aggiunta, ma errore nell\'invio della notifica email.',
+                    });
+                } else {
+                    console.log('Email inviata:', info.response);
+                    res.status(201).json({
+                        status: 'success',
+                        message: 'Recensione aggiunta e notifica email inviata al dottore.',
+                    });
+                }
             });
         });
     });
