@@ -79,8 +79,6 @@ function createDoctor(req, res, next) {
     const { id_specialization, first_name, last_name, email, phone, address, gender, description, emailOnly, phoneOnly } = req.body;
     const slug = slugify(first_name + '-' + last_name, { lower: true, strict: true });
 
-    // debug dati ricevuti
-    console.log('Dati ricevuti:', { id_specialization, first_name, last_name, email, phone, address, gender, description, image, slug });
 
     // Verifica se è una richiesta di solo controllo dell'email
     if (emailOnly) {
@@ -116,7 +114,6 @@ function createDoctor(req, res, next) {
 
     // Campi obbligatori
     if (!id_specialization || !first_name || !last_name || !email || !phone || !address || !description || !gender) {
-        console.log('Validazione fallita - Campi mancanti:', { id_specialization, first_name, last_name, email, phone, address, description, gender });
         return res.status(400).json({ status: "error", message: "Tutti i campi sono obbligatori" });
     }
 
