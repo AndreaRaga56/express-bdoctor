@@ -41,12 +41,11 @@ function getSingleDoctor(req, res, next) {
 
     // filtra le recensioni utilizzando l'id
     const sqlReview = `
-        SELECT reviews.id, reviews.patient_name, reviews.rating AS rating, reviews.content, reviews.email
+        SELECT reviews.id, reviews.patient_name, reviews.rating AS rating, reviews.content, reviews.email, reviews.data
         FROM reviews
         WHERE reviews.id_doctor = ?
-        ORDER BY reviews.id DESC;
-
-    `;
+        ORDER BY  reviews.data DESC, reviews.rating DESC;
+      `;
 
     connection.query(sql, [slug], (err, result) => {
         if (err) {
@@ -147,7 +146,8 @@ function createDoctor(req, res, next) {
     }
 
     // Verifica se l'email è valida
-    if (!email.includes('@')) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
         console.log('Validazione email fallita:', email);
         return res.status(400).json({ status: "error", message: "La mail inserita non è valida" });
     }
@@ -189,7 +189,7 @@ function createDoctor(req, res, next) {
                 }
 
                 console.log('Dottore creato con successo:', result.insertId);
-                res.status(201).json({ status: "success", message: "Dottore creato con successo", id: result.insertId });
+                res.status(201).json({ status: "success", message: "Dottore creato con successo", id: result.insertId, slug: slug});
             });
         });
     });

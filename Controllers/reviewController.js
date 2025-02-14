@@ -74,7 +74,7 @@ function createReviews(req, res, next) {
         const doctorEmail = result[0].email;
 
         // Se esiste crea la recensione
-        const sql = `INSERT INTO reviews (id_doctor, patient_name, rating, content, email) VALUES (?, ?, ?, ?, ?)`;
+        const sql = `INSERT INTO reviews (id_doctor, patient_name, rating, content, email, data) VALUES (?, ?, ?, ?, ?, CURDATE())`;
         connection.query(sql, [doctorId, patient_name, rating, content, email], (err, results) => {
             if (err) {
                 return next(new Error('Errore nella query del database'));
