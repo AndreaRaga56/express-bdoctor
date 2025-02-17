@@ -3,24 +3,86 @@ import slugify from 'slugify';
 
 // Funzione per ottenere lista dottori partendo dal voto più alto
 function getDoctors(req, res, next) {
-    const sql = `
+    console.log(req.body);
+
+    let sql = `
         SELECT doctors.id, doctors.first_name, doctors.last_name, doctors.slug, doctors.email, doctors.phone, 
        doctors.address, doctors.image, specializations.name AS specialization,
        ROUND(IFNULL(AVG(reviews.rating), 0), 2) AS average_rating
        FROM doctors
        LEFT JOIN reviews ON doctors.id = reviews.id_doctor
-       JOIN specializations ON doctors.id_specialization = specializations.id
-       GROUP BY doctors.id
-       ORDER BY average_rating DESC, doctors.first_name ASC;
+       JOIN specializations ON doctors.id_specialization = specializations.id`
 
-    `;
+    if (req.body.name || req.body.address) {
+        const { name, address } = req.body;
+        if (name && address) {
+            sql = `${sql}                 
+                WHERE doctors.first_name LIKE ? OR doctors.last_name LIKE ?
+                AND doctors.address LIKE ?
+                GROUP BY doctors.id
+                ORDER BY average_rating DESC, doctors.first_name ASC;
+            `;
+            console.log(sql);
 
-    connection.query(sql, (err, result) => {
-        if (err) {
-            return next(new Error("Errore nel recupero dei dottori"));
+            connection.query(sql, [`%${name}%`, `%${name}%`, `%${address}%`], (err, result) => {
+                console.log(sql);
+                if (err) {
+                    return next(new Error("Errore nel recupero dei dottori"));
+                }
+                return res.status(200).json({ status: "success", tot: result.length, data: result });
+            });
+            return;
+        } else if (name) {
+            sql = `${sql} 
+                WHERE doctors.first_name LIKE ? OR doctors.last_name LIKE ?
+                GROUP BY doctors.id
+                ORDER BY average_rating DESC, doctors.first_name ASC;
+            `;
+            console.log(sql);
+
+            connection.query(sql, [`%${name}%`, `%${name}%`], (err, result) => {
+                if (err) {
+                    return next(new Error("Errore nel recupero dei dottori"));
+                }
+                return res.status(200).json({ status: "success", tot: result.length, data: result });
+            });
+            return;
+
+        } else if (address) {
+            sql = `${sql} 
+                WHERE doctors.address LIKE ?
+                GROUP BY doctors.id
+                ORDER BY average_rating DESC, doctors.first_name ASC;
+            `;
+            console.log("richiesto indirizzo");
+            console.log(sql);
+            console.log(address);
+
+            connection.query(sql, [`%${address}%`], (err, result) => {
+                if (err) {
+                    return next(new Error("Errore nel recupero dei dottori"));
+                }
+                return res.status(200).json({ status: "success", tot: result.length, data: result });
+            });
+            return;
         }
-        return res.status(200).json({ status: "success", data: result });
-    });
+
+
+    } else {
+        sql = `${sql} 
+       GROUP BY doctors.id
+       ORDER BY average_rating DESC, doctors.first_name ASC;`;
+        console.log(sql);
+
+        connection.query(sql, (err, result) => {
+            if (err) {
+                return next(new Error("Errore nel recupero dei dottori"));
+            }
+            return res.status(200).json({ status: "success", tot: result.length, data: result });
+        });
+    }
+
+
 }
 
 // Funzione per ottenere i dettagli di un singolo dottore
@@ -189,7 +251,7 @@ function createDoctor(req, res, next) {
                 }
 
                 console.log('Dottore creato con successo:', result.insertId);
-                res.status(201).json({ status: "success", message: "Dottore creato con successo", id: result.insertId, slug: slug});
+                res.status(201).json({ status: "success", message: "Dottore creato con successo", id: result.insertId, slug: slug });
             });
         });
     });
