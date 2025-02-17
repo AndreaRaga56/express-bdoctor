@@ -32,10 +32,10 @@ function createReviews(req, res, next) {
     const { patient_name, rating, content, email } = req.body;
 
     // Validazione del voto
-    if (isNaN(rating) || rating < 0 || rating > 5) {
+    if (isNaN(rating) || rating < 1 || rating > 5) {
         return res.status(400).json({
             status: 'fail',
-            message: 'Il voto deve essere un valore numerico tra 0 e 5'
+            message: 'Il voto deve essere un valore numerico tra 1 e 5'
         });
     }
 
