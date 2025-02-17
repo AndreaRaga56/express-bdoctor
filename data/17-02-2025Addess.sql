@@ -1,0 +1,30 @@
+SET SQL_SAFE_UPDATES = 0;
+UPDATE doctors
+SET address = 
+    CASE id
+        WHEN 1 THEN 'Via Roma, 1, 20123 Milano MI, Italia'
+        WHEN 2 THEN 'Via Dante, 2, 00185 Roma RM, Italia'
+        WHEN 3 THEN 'Piazza Giuseppe Garibaldi, 3, 80142 Napoli NA, Italia'
+        WHEN 4 THEN 'Corso Italia, 4, 50123 Firenze FI, Italia'
+        WHEN 5 THEN 'Corso Regina Margherita, 5, 10124 Torino TO, Italia'
+        WHEN 6 THEN 'Via Verdi, 10, 20080 Milano MI, Italia'
+        WHEN 7 THEN 'Via Mazzini, 15, 00195 Roma RM, Italia'
+        WHEN 8 THEN 'Piazza Cavour, 8, 10123 Torino TO, Italia'
+        WHEN 9 THEN 'Via San Donato, 9, 40127 Bologna BO, Italia'
+        WHEN 10 THEN 'Via Donizetti, 4, 50144 Firenze FI, Italia'
+        WHEN 11 THEN 'Via Alessandro Manzoni, 2, 70122 Bari BA, Italia'
+        WHEN 12 THEN 'Via Vittoria Colonna, 1, 80121 Napoli NA, Italia'
+        WHEN 13 THEN 'Viale Piave, 2, 30132 Venezia VE, Italia'
+        WHEN 14 THEN 'Corso Garibaldi, 12, 90133 Palermo PA, Italia'
+        WHEN 15 THEN 'Via Vivaldi, 11, 16126 Genova GE, Italia'
+        WHEN 16 THEN 'Corso Vercelli, 3, 10152 Torino TO, Italia'
+        WHEN 17 THEN 'Via Rossini, 8, 70026 Bari BA, Italia'
+        WHEN 18 THEN 'Via Puccini, 5, 50144 Firenze FI, Italia'
+        WHEN 19 THEN 'Via Marconi, 10, 20123 Milano MI, Italia'
+        WHEN 20 THEN 'Via Carducci, 6, 00187 Roma RM, Italia'
+        WHEN 21 THEN 'Via Manzoni, 9, 30174 Venezia VE, Italia'
+        WHEN 22 THEN 'Corso Italia, 14, 50123 Firenze FI, Italia'
+        WHEN 23 THEN 'Piazza Dante, 3, 80135 Napoli NA, Italia'
+        WHEN 24 THEN 'Via Petrarca, 2, 90144 Palermo PA, Italia'
+        WHEN 25 THEN 'Via Bellini, 12, 40141 Bologna BO, Italia'
+    END;
