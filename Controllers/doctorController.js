@@ -3,65 +3,24 @@ import slugify from 'slugify';
 
 
 // Funzione per ottenere lista dottori partendo dal voto più alto
-function getDoctors(req, res) {
-
-
-    let sql = `
+function getDoctors(req, res, next) {
+    const sql = `
         SELECT doctors.id, doctors.first_name, doctors.last_name, doctors.slug, doctors.email, doctors.phone, 
        doctors.address, doctors.image, specializations.name AS specialization,
        ROUND(IFNULL(AVG(reviews.rating), 0), 2) AS average_rating
        FROM doctors
        LEFT JOIN reviews ON doctors.id = reviews.id_doctor
-       JOIN specializations ON doctors.id_specialization = specializations.id`
-    let filter = []
-
-    if (req.query.name || req.query.address || req.query.specialization) {
-        const { name, address, specialization } = req.query;
-        let a = [name, address, specialization]
-
-        if ( specialization && filter.length === 0) {
-            sql = `${sql} WHERE specializations.name LIKE ?`
-            filter = [`%${specialization}%`]            
-        }
-
-        if (address && filter.length === 0) {
-            for (let i = 0; i < address.length; i++) {
-                if (i === 0) {
-                    sql = `${sql} WHERE doctors.address LIKE ?`
-                    filter = [`%${address[i]}%`]
-                } else {
-                    sql = `${sql} AND doctors.address LIKE ?`
-                    filter = [...filter, `%${address[i]}%`]
-                }
-            }
-        } else if (address && filter.length > 0) {
-            for (let i = 0; i < address.length; i++) {
-                sql = `${sql} AND doctors.address LIKE ?`
-                filter = [...filter, `%${address[i]}%`]
-            }
-        }
-
-        if (name && filter.length === 0) {
-            sql = `${sql} WHERE doctors.first_name LIKE ? OR doctors.last_name LIKE ?`
-            filter = [`%${name}%`, `%${name}%`]
-            
-        } else if (name && filter.length > 0) {
-            sql = `${sql} AND doctors.first_name LIKE ? OR doctors.last_name LIKE ?`
-            filter = [...filter,`%${name}%`, `%${name}%`]
-        }
-    }
-    sql = `${sql} 
+       JOIN specializations ON doctors.id_specialization = specializations.id
        GROUP BY doctors.id
-       ORDER BY average_rating DESC, doctors.first_name ASC;`;
+       ORDER BY average_rating DESC, doctors.first_name ASC;`
 
-    connection.query(sql, filter, (err, result) => {
-        console.log(sql);
-        // console.log(filter);
+    ;
+
+    connection.query(sql, (err, result) => {
         if (err) {
             return next(new Error("Errore nel recupero dei dottori"));
         }
-        console.log(sql, result);
-        return res.status(200).json({ status: "success", tot: result.length, data: result });
+        return res.status(200).json({ status: "success", data: result });
     });
 }
 
