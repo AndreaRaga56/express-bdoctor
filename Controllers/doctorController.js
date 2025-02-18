@@ -4,6 +4,10 @@ import slugify from 'slugify';
 
 // Funzione per ottenere lista dottori partendo dal voto più alto
 function getDoctors(req, res, next) {
+
+    const { page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+
     const sql = `
         SELECT doctors.id, doctors.first_name, doctors.last_name, doctors.slug, doctors.email, doctors.phone, 
        doctors.address, doctors.image, specializations.name AS specialization,
@@ -12,21 +16,41 @@ function getDoctors(req, res, next) {
        LEFT JOIN reviews ON doctors.id = reviews.id_doctor
        JOIN specializations ON doctors.id_specialization = specializations.id
        GROUP BY doctors.id
-       ORDER BY average_rating DESC, doctors.first_name ASC;`
+       ORDER BY average_rating DESC, doctors.first_name ASC
+       LIMIT ? OFFSET ?
+    `;
 
-    ;
+    const countSql = `
+        SELECT COUNT(*) as total
+        FROM doctors
+    `;
 
-    connection.query(sql, (err, result) => {
+    connection.query(countSql, (err, countResult) => {
         if (err) {
-            return next(new Error("Errore nel recupero dei dottori"));
+            return next(new Error("Errore nel recupero del conteggio dei dottori"));
         }
-        return res.status(200).json({ status: "success", data: result });
+
+        const total = countResult[0].total;
+
+        connection.query(sql, [parseInt(limit), parseInt(offset)], (err, result) => {
+            if (err) {
+                return next(new Error("Errore nel recupero dei dottori"));
+            }
+            return res.status(200).json({
+                status: "success",
+                total: total,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                data: result
+            });
+        });
     });
 }
 
 // Funzione per ottenere i dettagli di un singolo dottore
 function getSingleDoctor(req, res, next) {
     const slug = req.params.slug;
+
 
     // include le informazioni di specializzazione
     const sql = `
