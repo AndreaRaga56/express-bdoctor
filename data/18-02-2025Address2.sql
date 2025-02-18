@@ -1,0 +1,16 @@
+UPDATE doctors SET address = 'Piazza Dante Alighieri, 2, 00185 Roma RM, Italia' WHERE id = 2;
+UPDATE doctors SET address = 'Piazza Giuseppe Garibaldi, 3, 80142 Napoli NA, Italia' WHERE id = 3;
+UPDATE doctors SET address = 'Via Giuseppe Verdi, 10, 20080 Milano MI, Italia' WHERE id = 6;
+UPDATE doctors SET address = 'Via Giuseppe Mazzini, 15, 00195 Roma RM, Italia' WHERE id = 7;
+UPDATE doctors SET address = 'Piazza Camillo Benso di Cavour, 8, 10123 Torino TO, Italia' WHERE id = 8;
+UPDATE doctors SET address = 'Via Gaetano Donizetti, 4, 50144 Firenze FI, Italia' WHERE id = 10;
+UPDATE doctors SET address = 'Via Alessandro Manzoni, 2, 70122 Bari BA, Italia' WHERE id = 11;
+UPDATE doctors SET address = 'Via Antonio Vivaldi, 11, 16126 Genova GE, Italia' WHERE id = 15;
+UPDATE doctors SET address = 'Via Gioachino Rossini, 8, 70026 Bari BA, Italia' WHERE id = 17;
+UPDATE doctors SET address = 'Via Giacomo Puccini, 5, 50144 Firenze FI, Italia' WHERE id = 18;
+UPDATE doctors SET address = 'Via Guglielmo Marconi, 10, 20123 Milano MI, Italia' WHERE id = 19;
+UPDATE doctors SET address = 'Via Giosuè Carducci, 6, 00187 Roma RM, Italia' WHERE id = 20;
+UPDATE doctors SET address = 'Via Alessandro Manzoni, 9, 30174 Venezia VE, Italia' WHERE id = 21;
+UPDATE doctors SET address = 'Piazza Dante Alighieri, 3, 80135 Napoli NA, Italia' WHERE id = 23;
+UPDATE doctors SET address = 'Via Francesco Petrarca, 2, 90144 Palermo PA, Italia' WHERE id = 24;
+UPDATE doctors SET address = 'Via Vincenzo Bellini, 12, 40141 Bologna BO, Italia' WHERE id = 25;

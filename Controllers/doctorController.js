@@ -1,9 +1,10 @@
 import connection from '../data/db.js';
 import slugify from 'slugify';
 
+
 // Funzione per ottenere lista dottori partendo dal voto più alto
-function getDoctors(req, res, next) {
-    console.log(req.body);
+function getDoctors(req, res) {
+
 
     let sql = `
         SELECT doctors.id, doctors.first_name, doctors.last_name, doctors.slug, doctors.email, doctors.phone, 
@@ -12,77 +13,56 @@ function getDoctors(req, res, next) {
        FROM doctors
        LEFT JOIN reviews ON doctors.id = reviews.id_doctor
        JOIN specializations ON doctors.id_specialization = specializations.id`
+    let filter = []
 
-    if (req.body.name || req.body.address) {
-        const { name, address } = req.body;
-        if (name && address) {
-            sql = `${sql}                 
-                WHERE doctors.first_name LIKE ? OR doctors.last_name LIKE ?
-                AND doctors.address LIKE ?
-                GROUP BY doctors.id
-                ORDER BY average_rating DESC, doctors.first_name ASC;
-            `;
-            console.log(sql);
+    if (req.query.name || req.query.address || req.query.specialization) {
+        const { name, address, specialization } = req.query;
+        let a = [name, address, specialization]
 
-            connection.query(sql, [`%${name}%`, `%${name}%`, `%${address}%`], (err, result) => {
-                console.log(sql);
-                if (err) {
-                    return next(new Error("Errore nel recupero dei dottori"));
-                }
-                return res.status(200).json({ status: "success", tot: result.length, data: result });
-            });
-            return;
-        } else if (name) {
-            sql = `${sql} 
-                WHERE doctors.first_name LIKE ? OR doctors.last_name LIKE ?
-                GROUP BY doctors.id
-                ORDER BY average_rating DESC, doctors.first_name ASC;
-            `;
-            console.log(sql);
-
-            connection.query(sql, [`%${name}%`, `%${name}%`], (err, result) => {
-                if (err) {
-                    return next(new Error("Errore nel recupero dei dottori"));
-                }
-                return res.status(200).json({ status: "success", tot: result.length, data: result });
-            });
-            return;
-
-        } else if (address) {
-            sql = `${sql} 
-                WHERE doctors.address LIKE ?
-                GROUP BY doctors.id
-                ORDER BY average_rating DESC, doctors.first_name ASC;
-            `;
-            console.log("richiesto indirizzo");
-            console.log(sql);
-            console.log(address);
-
-            connection.query(sql, [`%${address}%`], (err, result) => {
-                if (err) {
-                    return next(new Error("Errore nel recupero dei dottori"));
-                }
-                return res.status(200).json({ status: "success", tot: result.length, data: result });
-            });
-            return;
+        if ( specialization && filter.length === 0) {
+            sql = `${sql} WHERE specializations.name LIKE ?`
+            filter = [`%${specialization}%`]            
         }
 
+        if (address && filter.length === 0) {
+            for (let i = 0; i < address.length; i++) {
+                if (i === 0) {
+                    sql = `${sql} WHERE doctors.address LIKE ?`
+                    filter = [`%${address[i]}%`]
+                } else {
+                    sql = `${sql} AND doctors.address LIKE ?`
+                    filter = [...filter, `%${address[i]}%`]
+                }
+            }
+        } else if (address && filter.length > 0) {
+            for (let i = 0; i < address.length; i++) {
+                sql = `${sql} AND doctors.address LIKE ?`
+                filter = [...filter, `%${address[i]}%`]
+            }
+        }
 
-    } else {
-        sql = `${sql} 
+        if (name && filter.length === 0) {
+            sql = `${sql} WHERE doctors.first_name LIKE ? OR doctors.last_name LIKE ?`
+            filter = [`%${name}%`, `%${name}%`]
+            
+        } else if (name && filter.length > 0) {
+            sql = `${sql} AND doctors.first_name LIKE ? OR doctors.last_name LIKE ?`
+            filter = [...filter,`%${name}%`, `%${name}%`]
+        }
+    }
+    sql = `${sql} 
        GROUP BY doctors.id
        ORDER BY average_rating DESC, doctors.first_name ASC;`;
+
+    connection.query(sql, filter, (err, result) => {
         console.log(sql);
-
-        connection.query(sql, (err, result) => {
-            if (err) {
-                return next(new Error("Errore nel recupero dei dottori"));
-            }
-            return res.status(200).json({ status: "success", tot: result.length, data: result });
-        });
-    }
-
-
+        // console.log(filter);
+        if (err) {
+            return next(new Error("Errore nel recupero dei dottori"));
+        }
+        console.log(sql, result);
+        return res.status(200).json({ status: "success", tot: result.length, data: result });
+    });
 }
 
 // Funzione per ottenere i dettagli di un singolo dottore
