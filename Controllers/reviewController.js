@@ -47,13 +47,6 @@ function createReviews(req, res, next) {
         });
     }
 
-    // Validazione del testo
-    if (content && content.trim().length > 0 && content.trim().length < 5) {
-        return res.status(400).json({
-            status: 'fail',
-            message: 'Il testo deve essere lungo almeno 5 caratteri'
-        });
-    }
 
     // Validazione email
     if (!email.includes('@')) {
