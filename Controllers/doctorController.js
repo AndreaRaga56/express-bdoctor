@@ -8,38 +8,91 @@ function getDoctors(req, res, next) {
     const { page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
 
-    const sql = `
-        SELECT doctors.id, doctors.first_name, doctors.last_name, doctors.slug, doctors.email, doctors.phone, 
+
+    let sql = `
+    SELECT doctors.id, doctors.first_name, doctors.last_name, doctors.slug, doctors.email, doctors.phone, 
        doctors.address, doctors.image, specializations.name AS specialization,
        ROUND(IFNULL(AVG(reviews.rating), 0), 2) AS average_rating
        FROM doctors
        LEFT JOIN reviews ON doctors.id = reviews.id_doctor
        JOIN specializations ON doctors.id_specialization = specializations.id
+    `;
+
+    let countSql = `
+    SELECT COUNT(*) as total
+	    FROM doctors
+	    JOIN specializations ON doctors.id_specialization = specializations.id
+   `;
+
+    let filter = []
+
+    if (req.query.name || req.query.address || req.query.specialization) {
+        const { name, address, specialization } = req.query;
+        let a = [name, address, specialization]
+
+        if (specialization && filter.length === 0) {
+            sql = `${sql} WHERE specializations.name LIKE ?`
+            countSql = `${countSql} WHERE specializations.name LIKE ?`
+            filter = [`%${specialization}%`]
+        }
+
+        if (address && filter.length === 0) {
+            for (let i = 0; i < address.length; i++) {
+                if (i === 0) {
+                    sql = `${sql} WHERE doctors.address LIKE ?`
+                    countSql = `${countSql} WHERE doctors.address LIKE ?`
+                    filter = [`%${address[i]}%`]
+                } else {
+                    sql = `${sql} AND doctors.address LIKE ?`
+                    countSql = `${countSql} AND doctors.address LIKE ?`
+                    filter = [...filter, `%${address[i]}%`]
+                }
+            }
+        } else if (address && filter.length > 0) {
+            for (let i = 0; i < address.length; i++) {
+                sql = `${sql} AND doctors.address LIKE ?`
+                countSql = `${countSql} AND doctors.address LIKE ?`
+                filter = [...filter, `%${address[i]}%`]
+            }
+        }
+
+        if (name && filter.length === 0) {
+            sql = `${sql} WHERE (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
+            countSql = `${countSql} WHERE (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
+            filter = [`%${name}%`, `%${name}%`]
+
+        } else if (name && filter.length > 0) {
+            sql = `${sql} AND (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
+            countSql = `${countSql} AND (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
+            filter = [...filter, `%${name}%`, `%${name}%`]
+        }
+    }
+
+    sql = `${sql} 
        GROUP BY doctors.id
        ORDER BY average_rating DESC, doctors.first_name ASC
-       LIMIT ? OFFSET ?
+       LIMIT ? OFFSET ?;
     `;
 
-    const countSql = `
-        SELECT COUNT(*) as total
-        FROM doctors
-    `;
-
-    connection.query(countSql, (err, countResult) => {
+    connection.query(countSql, filter, (err, countResult) => {
         if (err) {
             return next(new Error("Errore nel recupero del conteggio dei dottori"));
         }
 
-        const total = countResult[0].total;
+        filter = [...filter, parseInt(limit), parseInt(offset)]
 
-        connection.query(sql, [parseInt(limit), parseInt(offset)], (err, result) => {
+        const totalDoctors = countResult[0].total;
+        const totalPages = Math.ceil(totalDoctors/limit);
+
+        connection.query(sql, filter, (err, result) => {
             if (err) {
                 return next(new Error("Errore nel recupero dei dottori"));
             }
             return res.status(200).json({
                 status: "success",
-                total: total,
+                totalDoctors: totalDoctors,
                 page: parseInt(page),
+                totalPages:totalPages,
                 limit: parseInt(limit),
                 data: result
             });
