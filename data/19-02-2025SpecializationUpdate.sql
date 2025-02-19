@@ -9,3 +9,5 @@ SET doctors.description =
         WHEN 'Ginecologia' THEN 'Specialista in Ginecologia. Esperto nella salute riproduttiva e nella cura delle patologie ginecologiche.<br> Servizi offerti:<ul><li>Visita ginecologica</li><li>Pap test</li><li>Ecografia pelvica</li><li>Monitoraggio della gravidanza</li><li>Consulenze sulla contraccezione</li><li>Diagnosi e trattamento delle infezioni vaginali</li><li>Menopausa e terapia ormonale</li><li>Trattamento delle malattie ginecologiche</li></ul>'
         ELSE doctors.description
     END;
+
+UPDATE `bdoctor-db`.`doctors` SET `address` = 'Via Torino, 1, 20123 Milano MI, Italia' WHERE (`id` = '1');
