@@ -5,7 +5,7 @@ import slugify from 'slugify';
 // Funzione per ottenere lista dottori partendo dal voto più alto
 function getDoctors(req, res, next) {
 
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 9 } = req.query;
     const offset = (page - 1) * limit;
 
 
