@@ -3,7 +3,7 @@ import transporter from '../data/sendMail.js';
 
 //Funzione per prelevare le recensioni di  un singolo dottore
 function getReviews(req, res, next) {
-    // const reviewId = req.params.id;
+    // Ottiene lo slug del dottore dai parametri della richiesta
     const slug = req.params.slug;
     const sql = `
         SELECT reviews.* 
@@ -29,6 +29,7 @@ function getReviews(req, res, next) {
 function createReviews(req, res, next) {
 
     const slug = req.params.slug;
+    // Ottiene i dati della recensione dal corpo della richiesta
     const { patient_name, rating, content, email } = req.body;
 
     // Validazione del voto
@@ -83,7 +84,7 @@ function createReviews(req, res, next) {
                     `Testo: ${content}\n\n` +
                     `Email del paziente: ${email}`,
             };
-
+           //gestisce la connessione al server SMTP di posta elettronica e invia le email
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
                     console.error('Errore durante l\'invio dell\'email:', error);
