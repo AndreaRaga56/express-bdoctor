@@ -4,11 +4,12 @@ import slugify from 'slugify';
 
 // Funzione per ottenere lista dottori partendo dal voto più alto
 function getDoctors(req, res, next) {
-
+    // Estrae i parametri di paginazione dalla query string, con valori predefiniti
     const { page = 1, limit = 9 } = req.query;
+    //determina da quale riga iniziare a restituire i risultati
     const offset = (page - 1) * limit;
 
-
+    // Query SQL per ottenere i dottori con le loro specializzazioni e la media delle recensioni
     let sql = `
     SELECT doctors.id, doctors.first_name, doctors.last_name, doctors.slug, doctors.email, doctors.phone, 
        doctors.address, doctors.image, specializations.name AS specialization,
@@ -17,7 +18,7 @@ function getDoctors(req, res, next) {
        LEFT JOIN reviews ON doctors.id = reviews.id_doctor
        JOIN specializations ON doctors.id_specialization = specializations.id
     `;
-
+    // Query SQL per contare il numero totale di dottori
     let countSql = `
     SELECT COUNT(*) as total
 	    FROM doctors
@@ -25,24 +26,27 @@ function getDoctors(req, res, next) {
    `;
 
     let filter = []
-
+    // Aggiunge filtri alla query se presenti nella richiesta
     if (req.query.name || req.query.address || req.query.specialization) {
         const { name, address, specialization } = req.query;
-        let a = [name, address, specialization]
 
+
+        // Filtra per specializzazione
         if (specialization && filter.length === 0) {
             sql = `${sql} WHERE specializations.name LIKE ?`
             countSql = `${countSql} WHERE specializations.name LIKE ?`
             filter = [`%${specialization}%`]
         }
-
+        // Filtra per indirizzo
         if (address && filter.length === 0) {
             for (let i = 0; i < address.length; i++) {
                 if (i === 0) {
+                    // Aggiunge una clausola WHERE per il primo elemento
                     sql = `${sql} WHERE doctors.address LIKE ?`
                     countSql = `${countSql} WHERE doctors.address LIKE ?`
                     filter = [`%${address[i]}%`]
                 } else {
+                    // Aggiunge una clausola AND per gli elementi successivi
                     sql = `${sql} AND doctors.address LIKE ?`
                     countSql = `${countSql} AND doctors.address LIKE ?`
                     filter = [...filter, `%${address[i]}%`]
@@ -50,12 +54,13 @@ function getDoctors(req, res, next) {
             }
         } else if (address && filter.length > 0) {
             for (let i = 0; i < address.length; i++) {
+                // Aggiunge una clausola AND per ogni elemento 
                 sql = `${sql} AND doctors.address LIKE ?`
                 countSql = `${countSql} AND doctors.address LIKE ?`
                 filter = [...filter, `%${address[i]}%`]
             }
         }
-
+        // Filtra per nome
         if (name && filter.length === 0) {
             for (let i = 0; i < name.length; i++) {
                 if (i === 0) {
@@ -74,23 +79,24 @@ function getDoctors(req, res, next) {
             filter = [...filter, `%${name[i]}%`, `%${name[i]}%`]
         }
     }
-
+    // Aggiunge clausole di raggruppamento, ordinamento e paginazione alla query
     sql = `${sql} 
        GROUP BY doctors.id
        ORDER BY average_rating DESC, doctors.first_name ASC
        LIMIT ? OFFSET ?;
     `;
-
+    // Esegue la query per contare il numero totale di dottori
     connection.query(countSql, filter, (err, countResult) => {
         if (err) {
             return next(new Error("Errore nel recupero del conteggio dei dottori"));
         }
-
+            // Aggiunge i parametri di limit e offset all'array filter
         filter = [...filter, parseInt(limit), parseInt(offset)]
-
+       // Ottiene il numero totale di dottori
         const totalDoctors = countResult[0].total;
+        // Calcola il numero totale di pagine
         const totalPages = Math.ceil(totalDoctors / limit);
-
+        // Esegue la query per ottenere i dottori
         connection.query(sql, filter, (err, result) => {
             if (err) {
                 return next(new Error("Errore nel recupero dei dottori"));
@@ -112,7 +118,7 @@ function getSingleDoctor(req, res, next) {
     const slug = req.params.slug;
 
 
-    // include le informazioni di specializzazione
+    // Query SQL per ottenere i dettagli del dottore e la sua specializzazione
     const sql = `
        SELECT doctors.*, 
        specializations.name AS specialization,
@@ -124,14 +130,14 @@ function getSingleDoctor(req, res, next) {
        GROUP BY doctors.id, specializations.name;
     `;
 
-    // filtra le recensioni utilizzando l'id
+    // Query SQL per ottenere le recensioni del dottore
     const sqlReview = `
         SELECT reviews.id, reviews.patient_name, reviews.rating AS rating, reviews.content, reviews.email, reviews.data
         FROM reviews
         WHERE reviews.id_doctor = ?
         ORDER BY  reviews.data DESC, reviews.rating DESC;
       `;
-
+    // Esegue la query per ottenere i dettagli del dottore
     connection.query(sql, [slug], (err, result) => {
         if (err) {
             return next(new Error("Errore interno del server"));
@@ -140,9 +146,9 @@ function getSingleDoctor(req, res, next) {
         if (result.length === 0) {
             return res.status(404).json({ status: "error", message: "Il medico che stai cercando non è presente nel Database" });
         }
-
+        //accede al primo elemento dell'array result
         const doctorData = result[0];
-
+        // Esegue la query per ottenere le recensioni del dottore
         connection.query(sqlReview, [doctorData.id], (err2, reviews) => {
             if (err2) {
                 return next(new Error("Errore interno del server nel recupero delle recensioni"));
