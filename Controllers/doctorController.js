@@ -57,14 +57,21 @@ function getDoctors(req, res, next) {
         }
 
         if (name && filter.length === 0) {
-            sql = `${sql} WHERE (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
-            countSql = `${countSql} WHERE (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
-            filter = [`%${name}%`, `%${name}%`]
-
+            for (let i = 0; i < name.length; i++) {
+                if (i === 0) {
+                    sql = `${sql} WHERE (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
+                    countSql = `${countSql} WHERE (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
+                    filter = [`%${name[i]}%`, `%${name[i]}%`]
+                } else{
+                    sql = `${sql} AND (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
+                    countSql = `${countSql} AND (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
+                    filter = [ ...filter, `%${name[i]}%`, `%${name[i]}%`]
+                }
+            }
         } else if (name && filter.length > 0) {
             sql = `${sql} AND (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
             countSql = `${countSql} AND (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
-            filter = [...filter, `%${name}%`, `%${name}%`]
+            filter = [...filter, `%${name[i]}%`, `%${name[i]}%`]
         }
     }
 
@@ -82,7 +89,7 @@ function getDoctors(req, res, next) {
         filter = [...filter, parseInt(limit), parseInt(offset)]
 
         const totalDoctors = countResult[0].total;
-        const totalPages = Math.ceil(totalDoctors/limit);
+        const totalPages = Math.ceil(totalDoctors / limit);
 
         connection.query(sql, filter, (err, result) => {
             if (err) {
@@ -92,7 +99,7 @@ function getDoctors(req, res, next) {
                 status: "success",
                 totalDoctors: totalDoctors,
                 page: parseInt(page),
-                totalPages:totalPages,
+                totalPages: totalPages,
                 limit: parseInt(limit),
                 data: result
             });
@@ -155,8 +162,7 @@ function createDoctor(req, res, next) {
     // utilizza l'operatore di optional chaining (?.) per accedere alla proprietà filename dell'oggetto req.file
     const image = req.file?.filename || null; // `image` facoltativo
     const { id_specialization, first_name, last_name, email, phone, address, gender, description, emailOnly, phoneOnly } = req.body;
-    const slug = slugify(first_name + '-' + last_name, { lower: true, strict: true });
-
+    let slug = slugify(first_name + '-' + last_name, { lower: true, strict: true });
 
     // Verifica se è una richiesta di solo controllo dell'email
     if (emailOnly) {
@@ -254,27 +260,43 @@ function createDoctor(req, res, next) {
                 return res.status(400).json({ status: "error", message: "Email già registrata" });
             }
 
-            // Se i campi sono validi e l'email e il telefono non sono registrati procede con la query di creazione
-            const sql = `
-                INSERT INTO doctors (id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-            `;
+            // Verifica se lo slug è già presente nel database e aggiungi un numero incrementale se necessario
+            let slugIndex = 1;
+            const checkSlug = () => {
+                const checkSlugSql = "SELECT id FROM doctors WHERE slug = ?";
+                connection.query(checkSlugSql, [slug], (err, slugResult) => {
+                    if (err) {
+                        console.log('Errore durante la verifica dello slug:', err.message);
+                        return next(new Error(err.message));
+                    }
 
-            connection.query(sql, [id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug], (err, result) => {
-                if (err) {
-                    console.error('Errore durante la creazione del dottore:', err.message);
-                    return next(new Error("Errore durante la creazione del dottore"));
-                }
+                    if (slugResult.length > 0) {
+                        slug = `${slug}-${slugIndex}`;
+                        slugIndex++;
+                        checkSlug();
+                    } else {
+                        // Se i campi sono validi e l'email, il telefono e lo slug non sono registrati, procede con la query di creazione
+                        const sql = `
+                            INSERT INTO doctors (id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                        `;
 
-                console.log('Dottore creato con successo:', result.insertId);
-                res.status(201).json({ status: "success", message: "Dottore creato con successo", id: result.insertId, slug: slug });
-            });
+                        connection.query(sql, [id_specialization, first_name, last_name, email, phone, address, image, gender, description, slug], (err, result) => {
+                            if (err) {
+                                console.error('Errore durante la creazione del dottore:', err.message);
+                                return next(new Error("Errore durante la creazione del dottore"));
+                            }
+
+                            console.log('Dottore creato con successo:', result.insertId);
+                            res.status(201).json({ status: "success", message: "Dottore creato con successo", id: result.insertId, slug: slug });
+                        });
+                    }
+                });
+            };
+            checkSlug();
         });
     });
 }
-
-
-
 
 export default {
     getDoctors,
