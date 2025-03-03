@@ -67,16 +67,18 @@ function getDoctors(req, res, next) {
                     sql = `${sql} WHERE (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
                     countSql = `${countSql} WHERE (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
                     filter = [`%${name[i]}%`, `%${name[i]}%`]
-                } else{
+                } else {
                     sql = `${sql} AND (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
                     countSql = `${countSql} AND (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
-                    filter = [ ...filter, `%${name[i]}%`, `%${name[i]}%`]
+                    filter = [...filter, `%${name[i]}%`, `%${name[i]}%`]
                 }
             }
         } else if (name && filter.length > 0) {
-            sql = `${sql} AND (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
-            countSql = `${countSql} AND (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
-            filter = [...filter, `%${name[i]}%`, `%${name[i]}%`]
+            for (let i = 0; i < name.length; i++) {
+                sql = `${sql} AND (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
+                countSql = `${countSql} AND (doctors.first_name LIKE ? OR doctors.last_name LIKE ?)`
+                filter = [...filter, `%${name[i]}%`, `%${name[i]}%`]
+            }
         }
     }
     // Aggiunge clausole di raggruppamento, ordinamento e paginazione alla query
@@ -90,9 +92,9 @@ function getDoctors(req, res, next) {
         if (err) {
             return next(new Error("Errore nel recupero del conteggio dei dottori"));
         }
-            // Aggiunge i parametri di limit e offset all'array filter
+        // Aggiunge i parametri di limit e offset all'array filter
         filter = [...filter, parseInt(limit), parseInt(offset)]
-       // Ottiene il numero totale di dottori
+        // Ottiene il numero totale di dottori
         const totalDoctors = countResult[0].total;
         // Calcola il numero totale di pagine
         const totalPages = Math.ceil(totalDoctors / limit);
@@ -101,6 +103,7 @@ function getDoctors(req, res, next) {
             if (err) {
                 return next(new Error("Errore nel recupero dei dottori"));
             }
+            console.log(filter)
             return res.status(200).json({
                 status: "success",
                 totalDoctors: totalDoctors,
